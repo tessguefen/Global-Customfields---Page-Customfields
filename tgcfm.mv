@@ -9,6 +9,22 @@
 </MvFUNCTION>
 
 <MvFUNCTION NAME = "Module_Install_Store" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "">
+	<MvIF EXPR = "{ NOT [ g.Module_Library_DB ].StoreKey_Insert( 'TGCFM_Fields', 1 ) }">
+		<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
+		<MvFUNCTIONRETURN VALUE = 0>
+	</MvIF>
+	
+	<MvIF EXPR = "{ NOT [ g.Module_Library_DB ].StoreKey_Insert( 'TGCFM_Groups', 1 ) }">
+		<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
+		<MvFUNCTIONRETURN VALUE = 0>
+	</MvIF>
+	
+	<MvIF EXPR = "{ NOT [ g.Module_Library_DB ].StoreKey_Insert( 'TGCFM_FieldOptions', 1 ) }">
+		<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
+		<MvFUNCTIONRETURN VALUE = 0>
+	</MvIF>
+	
+
 	<MvQUERY NAME	= "Merchant"
 				 QUERY	= "{ 'CREATE TABLE ' $  g.Store_Table_Prefix $ 'TGCFM_GlobalFields
 							  (
@@ -18,18 +34,21 @@
 								value	' $ [ g.Module_Library_Native_DBAPI ].DB_Type_MEMO()			$ '
 							  ) ' }">
 		<MvIF EXPR = "{ g.MvQUERY_Error }">
+			<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
 			<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-INSTALL-1000', g.MvQUERY_Error ) }">
 		</MvIF>
 
 		<MvQUERY NAME	= "Merchant"
 				 QUERY	= "{ 'CREATE UNIQUE INDEX ' $ g.Store_Table_Prefix $ 'TGCFM_GlobalFields_1 ON ' $ g.Store_Table_Prefix $ 'TGCFM_GlobalFields ( id )' }">
 		<MvIF EXPR = "{ g.MvQUERY_Error }">
+			<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
 			<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-INSTALL-1001', g.MvQUERY_Error ) }">
 		</MvIF>
 
 		<MvQUERY NAME	= "Merchant"
 				 QUERY	= "{ 'CREATE INDEX ' $ g.Store_Table_Prefix $ 'TGCFM_GlobalFields_2 ON ' $ g.Store_Table_Prefix $ 'TGCFM_GlobalFields ( code )' }">
 		<MvIF EXPR = "{ g.MvQUERY_Error }">
+			<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
 			<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-INSTALL-1002', g.MvQUERY_Error ) }">
 		</MvIF>
 
@@ -44,24 +63,28 @@
 							info		' $ [ g.Module_Library_Native_DBAPI ].DB_Type_MEMO()			$ '
 						  ) ' }">
 		<MvIF EXPR = "{ g.MvQUERY_Error }">
+			<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
 			<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-INSTALL-1005', g.MvQUERY_Error ) }">
 		</MvIF>
 
 		<MvQUERY NAME	= "Merchant"
 				 QUERY	= "{ 'CREATE UNIQUE INDEX ' $ g.Store_Table_Prefix $ 'TGCFM_PageFields_1 ON ' $ g.Store_Table_Prefix $ 'TGCFM_PageFields ( id )' }">
 		<MvIF EXPR = "{ g.MvQUERY_Error }">
+			<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
 			<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-INSTALL-1006', g.MvQUERY_Error ) }">
 		</MvIF>
 
 		<MvQUERY NAME	= "Merchant"
 				 QUERY	= "{ 'CREATE INDEX ' $ g.Store_Table_Prefix $ 'TGCFM_PageFields_2 ON ' $ g.Store_Table_Prefix $ 'TGCFM_PageFields ( code )' }">
 		<MvIF EXPR = "{ g.MvQUERY_Error }">
+			<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
 			<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-INSTALL-1007', g.MvQUERY_Error ) }">
 		</MvIF>
 		
 		<MvQUERY NAME	= "Merchant"
 				 QUERY	= "{ 'CREATE INDEX ' $ g.Store_Table_Prefix $ 'TGCFM_PageFields_3 ON ' $ g.Store_Table_Prefix $ 'TGCFM_PageFields ( group_id )' }">
 		<MvIF EXPR = "{ g.MvQUERY_Error }">
+			<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
 			<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-INSTALL-1008', g.MvQUERY_Error ) }">
 		</MvIF>
 
@@ -73,12 +96,14 @@
 								value		' $ [ g.Module_Library_Native_DBAPI ].DB_Type_MEMO()			$ '
 							  ) ' }">
 		<MvIF EXPR = "{ g.MvQUERY_Error }">
+			<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
 			<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-INSTALL-1009', g.MvQUERY_Error ) }">
 		</MvIF>
 
 		<MvQUERY NAME	= "Merchant"
 				 QUERY	= "{ 'CREATE UNIQUE INDEX ' $ g.Store_Table_Prefix $ 'TGCFM_PageValues_1 ON ' $ g.Store_Table_Prefix $ 'TGCFM_PageValues ( page_id, field_id )' }">
 		<MvIF EXPR = "{ g.MvQUERY_Error }">
+			<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
 			<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-INSTALL-1010', g.MvQUERY_Error ) }">
 		</MvIF>
 
@@ -96,18 +121,21 @@
 								name		' $ [ g.Module_Library_Native_DBAPI ].DB_Type_CHAR( 100 ) 		$ '
 							  )' }">
 		<MvIF EXPR = "{ g.MvQUERY_Error }">
+			<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
 			<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-INSTALL-1011', g.MvQUERY_Error ) }">
 		</MvIF>
 		
 		<MvQUERY NAME	= "Merchant"
 				 QUERY	= "{ 'CREATE UNIQUE INDEX ' $ g.Store_Table_Prefix $ 'TGCFM_Groups_1 ON ' $ g.Store_Table_Prefix $ 'TGCFM_Groups ( id )' }">
 		<MvIF EXPR = "{ g.MvQUERY_Error }">
+			<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
 			<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-INSTALL-1012', g.MvQUERY_Error ) }">
 		</MvIF>
 
 		<MvQUERY NAME	= "Merchant"
 				 QUERY	= "{ 'CREATE INDEX ' $ g.Store_Table_Prefix $ 'TGCFM_Groups_2 ON ' $ g.Store_Table_Prefix $ 'TGCFM_Groups ( code )' }">
 		<MvIF EXPR = "{ g.MvQUERY_Error }">
+			<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
 			<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-INSTALL-1013', g.MvQUERY_Error ) }">
 		</MvIF>
 
@@ -125,18 +153,21 @@
 								value		' $ [ g.Module_Library_Native_DBAPI ].DB_Type_CHAR( 254 ) 		$ '
 							  )' }">
 		<MvIF EXPR = "{ g.MvQUERY_Error }">
+			<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
 			<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-INSTALL-1014', g.MvQUERY_Error ) }">
 		</MvIF>
 		
 		<MvQUERY NAME	= "Merchant"
 				 QUERY	= "{ 'CREATE UNIQUE INDEX ' $ g.Store_Table_Prefix $ 'TGCFM_FieldOptions_1 ON ' $ g.Store_Table_Prefix $ 'TGCFM_FieldOptions ( id )' }">
 		<MvIF EXPR = "{ g.MvQUERY_Error }">
+			<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
 			<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-INSTALL-1015', g.MvQUERY_Error ) }">
 		</MvIF>
 		
 		<MvQUERY NAME	= "Merchant"
 				 QUERY	= "{ 'CREATE INDEX ' $ g.Store_Table_Prefix $ 'TGCFM_FieldOptions_2 ON ' $ g.Store_Table_Prefix $ 'TGCFM_FieldOptions ( field_id )' }">
 		<MvIF EXPR = "{ g.MvQUERY_Error }">
+			<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
 			<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-INSTALL-1016', g.MvQUERY_Error ) }">
 		</MvIF>
 	<MvFUNCTIONRETURN VALUE = 1 />
@@ -203,7 +234,8 @@
 
 <MvFUNCTION NAME = "Module_Utility_Content" PARAMETERS = "module var, tab, load_fields" STANDARDOUTPUTLEVEL = "text, html, compresswhitespace">
 	<MvIF EXPR = "{ l.tab EQ 'TGCFM_Global' }">
-		yoooo
+		<MvEVAL EXPR = "{ [ g.Module_Admin ].Element_MMBatchList_HTML() }">
+		<div id="jsTGCFM_GlobalBatchlist"></div>
 		<MvFUNCTIONRETURN VALUE = 1 />
 	</MvIF>
 	<MvIF EXPR = "{ l.tab EQ 'TGCFM_Pages' }">
@@ -218,6 +250,15 @@
 </MvFUNCTION>
 
 <MvFUNCTION NAME = "Module_Utility_Head" PARAMETERS = "module var, tab" STANDARDOUTPUTLEVEL = "text, html, compresswhitespace">
+	<MvIF EXPR = "{ l.tab EQ 'TGCFM_Global' }">
+		<MvEVAL EXPR = "{ [ g.Module_Admin ].Element_MMBatchList_JavaScript() }">
+		<MvEVAL EXPR = "{ [ g.Module_Admin ].Element_MMBatchList_CSS() }">
+		<script language="JavaScript" src="{ g.clientside_url $ 'Module_Code=' $ encodeattribute( l.module:code ) $ '&Filename=tgcfm_global.js' }"></script>
+		<script language="JavaScript">
+			MMScreen_LoadFinished( function() { new TGCFM_GlobalBatchlist(); } );
+		</script>
+		<MvFUNCTIONRETURN VALUE = 1 />
+	</MvIF>
 	<MvFUNCTIONRETURN VALUE = 1 />
 </MvFUNCTION>
 
@@ -240,6 +281,10 @@
 </MvCOMMENT>
 
 <MvFUNCTION NAME = "Module_Clientside" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "text, compresswhitespace">
+	<MvIF EXPR = "{ g.Filename EQ 'tgcfm_global.js' }">
+		<MvEVAL EXPR = "{ [ g.Module_Clientside ].Module_Content_Type( l.module, 'text/javascript' ) }">
+		<MvINCLUDE FILE = "js/tgcfm_global.js">
+	</MvIF>
 </MvFUNCTION>
 
 
@@ -249,7 +294,9 @@
 | ========================================================================================================================
 </MvCOMMENT>
 
-<MvFUNCTION NAME = "Module_JSON" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "text, compresswhitespace">
+<MvFUNCTION NAME = "Module_JSON" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "">
+	<MvIF EXPR = "{ NOT g.Admin_Open_Store }"><MvFUNCTIONRETURN></MvIF>
+	<MvIF EXPR = "{ g.Module_Function EQ 'JSON_Global_CFS_Load_Query'}"><MvFUNCTIONRETURN VALUE = "{ JSON_Global_CFS_Load_Query( l.module )	}"></MvIF>
 </MvFUNCTION>
 
 
@@ -297,3 +344,5 @@
 
 <MvFUNCTION NAME = "ComponentModule_Render_Start" PARAMETERS = "module var, item, settings var, item_settings var, param" STANDARDOUTPUTLEVEL = "">
 </MvFUNCTION>
+
+<MvINCLUDE FILE = "functions.mv">
