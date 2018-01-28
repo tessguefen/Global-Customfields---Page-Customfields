@@ -1,8 +1,84 @@
 <MvCOMMENT>
 	Functions List
-	
-	JSON_Global_CFS_Load_Query
+
+	GlobalField_Read( output var )
+	Load_Global_CFM( code, output var)
+	Global_Insert( global_cfm var )
+	Global_Insert_Lowlevel( global_cfm var )
+
+
+	JSON_Global_CFS_Load_Query( module var )
+	JSON_Global_Insert( module var )
 </MvCOMMENT>
+
+<MvFUNCTION NAME = "GlobalField_Read" PARAMETERS = "output var" STANDARDOUTPUTLEVEL = "">
+	<MvASSIGN NAME = "l.output:id"		VALUE = "{ TGCFM_GlobalFields.d.id }">
+	<MvASSIGN NAME = "l.output:code"	VALUE = "{ TGCFM_GlobalFields.d.code }">
+	<MvASSIGN NAME = "l.output:name"	VALUE = "{ TGCFM_GlobalFields.d.name }">
+	<MvASSIGN NAME = "l.output:value"	VALUE = "{ TGCFM_GlobalFields.d.value }">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "Load_Global_CFM" PARAMETERS = "code, output var" STANDARDOUTPUTLEVEL = "">
+	<MvOPENVIEW NAME	= "Merchant"
+				VIEW	= "TGCFM_GlobalFields"
+				QUERY	= "{ 'SELECT * FROM ' $ g.Store_Table_Prefix $ 'TGCFM_GlobalFields WHERE ' $ [ g.Module_Library_Native_DBAPI ].DB_Compare_UPPER( 'code' ) $ ' = ' $ [ g.Module_Library_Native_DBAPI ].DB_Compare_UPPER( '?' ) }"
+				FIELDS	= "l.code">
+	<MvIF EXPR = "{ g.MvOPENVIEW_Error }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Library_Filename_Utilities ].Error( 'TGCFM-ERROR-0002', g.MvOPENVIEW_Error ) }">
+	</MvIF>
+
+	<MvIF EXPR = "{ TGCFM_GlobalFields.d.EOF }">
+		<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_GlobalFields">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_DB ].Error_Load_EOF( 'TGCFM-ERROR-0003' ) }">
+	</MvIF>
+
+	<MvEVAL EXPR = "{ GlobalField_Read( l.output ) }">
+	<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_GlobalFields">
+
+	<MvFUNCTIONRETURN VALUE = 1>
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "Global_Insert" PARAMETERS = "global_cfm var" STANDARDOUTPUTLEVEL = "">
+	<MvASSIGN NAME = "l.global_cfm" MEMBER = "code" VALUE = "{ trim( l.global_cfm:code ) }">
+	<MvASSIGN NAME = "l.global_cfm" MEMBER = "name" VALUE = "{ trim( l.global_cfm:name ) }">
+	<MvASSIGN NAME = "l.global_cfm" MEMBER = "value" VALUE = "{ trim( l.global_cfm:value ) }">
+
+	<MvIF EXPR = "{ ISNULL l.global_cfm:code }">
+		<MvASSIGN NAME = "g.Error_Code" VALUE = "code">
+		<MvASSIGN NAME = "g.Error_Message" VALUE = "Code is required.">
+		<MvFUNCTIONRETURN VALUE = 0>
+	<MvELSEIF EXPR = "{ Load_Global_CFM( l.global_cfm:code, l.temp_cfm ) }">
+		<MvASSIGN NAME = "g.Error_Code" VALUE = "code">
+		<MvASSIGN NAME = "g.Error_Message" VALUE = "{ 'The code ' $ l.global_cfm:code $ ' already exist.' }">
+		<MvFUNCTIONRETURN VALUE = 0>
+	</MvIF>
+
+	<MvIF EXPR = "{ ISNULL l.global_cfm:name }">
+		<MvASSIGN NAME = "g.Error_Code" VALUE = "name">
+		<MvASSIGN NAME = "g.Error_Message" VALUE = "Name is required.">
+		<MvFUNCTIONRETURN VALUE = 0>
+	</MvIF>
+
+	<MvFUNCTIONRETURN VALUE = "{ Global_Insert_Lowlevel( l.global_cfm ) }">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "Global_Insert_Lowlevel" PARAMETERS = "global_cfm var" STANDARDOUTPUTLEVEL = "">
+	<MvASSIGN NAME = "l.global_cfm" MEMBER = "id" VALUE = "{ [ g.Module_Library_DB ].StoreKey_Generate( 'TGCFM_Fields' ) }">
+	<MvQUERY NAME	= "Merchant"
+			 QUERY	= "{ 'INSERT INTO ' $ g.Store_Table_Prefix $ 'TGCFM_GlobalFields
+					      ( id, code, name, value )
+						  VALUES
+						  ( ?, ?, ?, ? )' }"
+			 FIELDS	= "l.global_cfm:id, l.global_cfm:code, l.global_cfm:name, l.global_cfm:value">
+	<MvIF EXPR = "{ g.MvQUERY_Error }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-0001', g.MvQUERY_Error ) }">
+	</MvIF>
+
+	<MvFUNCTIONRETURN VALUE = 1>
+</MvFUNCTION>
+
+
+
 
 <MvFUNCTION NAME = "JSON_Global_CFS_Load_Query" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "text, html, compresswhitespace">
 	<MvASSIGN NAME = "g.Filter"			VALUE = "{ trim( g.Filter ) }">
@@ -24,7 +100,7 @@
 	<MvIF EXPR = "{ NOT [ g.Module_Library_DB ].SQL_Query_Count( l.search_query, l.total_count ) }">
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_Error(g.Error_Code, g.Error_Message ) }">
 	<MvELSEIF EXPR = "{ NOT [ g.Module_Library_Native_DBAPI ].DB_OPENVIEW_Range('Merchant', 'TGCFM_GlobalFields', l.search_sql, l.search_fields, g.Offset, g.Count) }">
-		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_Error( 'TGReviews-JSON-0001', g.MvOPENVIEW_Error ) }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_Error( 'TGCFM-JSON-0001', g.MvOPENVIEW_Error ) }">
 	</MvIF>
 
 	<MvASSIGN NAME = "l.count" VALUE = 0>
@@ -50,4 +126,16 @@
 		<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_GlobalFields">
 	}
 
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "JSON_Global_Insert" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "">
+	<MvASSIGN NAME = "l.global_cfm" MEMBER = "code" VALUE = "{ g.Code }">
+	<MvASSIGN NAME = "l.global_cfm" MEMBER = "name" VALUE = "{ g.Name }">
+	<MvASSIGN NAME = "l.global_cfm" MEMBER = "value" VALUE = "{ g.Value }">
+
+	<MvIF EXPR = "{ NOT Global_Insert( l.global_cfm ) }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_FieldError( g.Error_Code, g.Error_Message ) }">
+	</MvIF>
+
+	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_Success() }">
 </MvFUNCTION>

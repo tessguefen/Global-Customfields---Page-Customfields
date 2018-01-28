@@ -297,6 +297,7 @@
 <MvFUNCTION NAME = "Module_JSON" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "">
 	<MvIF EXPR = "{ NOT g.Admin_Open_Store }"><MvFUNCTIONRETURN></MvIF>
 	<MvIF EXPR = "{ g.Module_Function EQ 'JSON_Global_CFS_Load_Query'}"><MvFUNCTIONRETURN VALUE = "{ JSON_Global_CFS_Load_Query( l.module )	}"></MvIF>
+	<MvIF EXPR = "{ g.Module_Function EQ 'TGCFS_Global_Insert' }"><MvFUNCTIONRETURN VALUE = "{ JSON_Global_Insert( l.module )	}"></MvIF>
 </MvFUNCTION>
 
 
