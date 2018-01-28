@@ -2,13 +2,18 @@
 	Functions List
 
 	GlobalField_Read( output var )
-	Load_Global_CFM( code, output var)
+	Load_Global_CFM_ID( id, output var )
+	Load_Global_CFM_Code( code, output var)
 	Global_Insert( global_cfm var )
 	Global_Insert_Lowlevel( global_cfm var )
-
+	Global_Update( global_cfm var )
+	Global_Update_LowLevel( global_cfm var )
+	Global_Delete( id )
 
 	JSON_Global_CFS_Load_Query( module var )
 	JSON_Global_Insert( module var )
+	JSON_Global_Update( module var )
+	JSON_Global_Delete( module var )
 </MvCOMMENT>
 
 <MvFUNCTION NAME = "GlobalField_Read" PARAMETERS = "output var" STANDARDOUTPUTLEVEL = "">
@@ -18,11 +23,11 @@
 	<MvASSIGN NAME = "l.output:value"	VALUE = "{ TGCFM_GlobalFields.d.value }">
 </MvFUNCTION>
 
-<MvFUNCTION NAME = "Load_Global_CFM" PARAMETERS = "code, output var" STANDARDOUTPUTLEVEL = "">
+<MvFUNCTION NAME = "Load_Global_CFM_ID" PARAMETERS = "id, output var" STANDARDOUTPUTLEVEL = "">
 	<MvOPENVIEW NAME	= "Merchant"
 				VIEW	= "TGCFM_GlobalFields"
-				QUERY	= "{ 'SELECT * FROM ' $ g.Store_Table_Prefix $ 'TGCFM_GlobalFields WHERE ' $ [ g.Module_Library_Native_DBAPI ].DB_Compare_UPPER( 'code' ) $ ' = ' $ [ g.Module_Library_Native_DBAPI ].DB_Compare_UPPER( '?' ) }"
-				FIELDS	= "l.code">
+				QUERY	= "{ 'SELECT * FROM ' $ g.Store_Table_Prefix $ 'TGCFM_GlobalFields WHERE id = ?' }"
+				FIELDS	= "l.id">
 	<MvIF EXPR = "{ g.MvOPENVIEW_Error }">
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Library_Filename_Utilities ].Error( 'TGCFM-ERROR-0002', g.MvOPENVIEW_Error ) }">
 	</MvIF>
@@ -30,6 +35,26 @@
 	<MvIF EXPR = "{ TGCFM_GlobalFields.d.EOF }">
 		<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_GlobalFields">
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_DB ].Error_Load_EOF( 'TGCFM-ERROR-0003' ) }">
+	</MvIF>
+
+	<MvEVAL EXPR = "{ GlobalField_Read( l.output ) }">
+	<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_GlobalFields">
+
+	<MvFUNCTIONRETURN VALUE = 1>
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "Load_Global_CFM_Code" PARAMETERS = "code, output var" STANDARDOUTPUTLEVEL = "">
+	<MvOPENVIEW NAME	= "Merchant"
+				VIEW	= "TGCFM_GlobalFields"
+				QUERY	= "{ 'SELECT * FROM ' $ g.Store_Table_Prefix $ 'TGCFM_GlobalFields WHERE ' $ [ g.Module_Library_Native_DBAPI ].DB_Compare_UPPER( 'code' ) $ ' = ' $ [ g.Module_Library_Native_DBAPI ].DB_Compare_UPPER( '?' ) }"
+				FIELDS	= "l.code">
+	<MvIF EXPR = "{ g.MvOPENVIEW_Error }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Library_Filename_Utilities ].Error( 'TGCFM-ERROR-0004', g.MvOPENVIEW_Error ) }">
+	</MvIF>
+
+	<MvIF EXPR = "{ TGCFM_GlobalFields.d.EOF }">
+		<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_GlobalFields">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_DB ].Error_Load_EOF( 'TGCFM-ERROR-0005' ) }">
 	</MvIF>
 
 	<MvEVAL EXPR = "{ GlobalField_Read( l.output ) }">
@@ -47,7 +72,7 @@
 		<MvASSIGN NAME = "g.Error_Code" VALUE = "code">
 		<MvASSIGN NAME = "g.Error_Message" VALUE = "Code is required.">
 		<MvFUNCTIONRETURN VALUE = 0>
-	<MvELSEIF EXPR = "{ Load_Global_CFM( l.global_cfm:code, l.temp_cfm ) }">
+	<MvELSEIF EXPR = "{ Load_Global_CFM_Code( l.global_cfm:code, l.temp_cfm ) }">
 		<MvASSIGN NAME = "g.Error_Code" VALUE = "code">
 		<MvASSIGN NAME = "g.Error_Message" VALUE = "{ 'The code ' $ l.global_cfm:code $ ' already exist.' }">
 		<MvFUNCTIONRETURN VALUE = 0>
@@ -72,6 +97,60 @@
 			 FIELDS	= "l.global_cfm:id, l.global_cfm:code, l.global_cfm:name, l.global_cfm:value">
 	<MvIF EXPR = "{ g.MvQUERY_Error }">
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-0001', g.MvQUERY_Error ) }">
+	</MvIF>
+
+	<MvFUNCTIONRETURN VALUE = 1>
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "Global_Update" PARAMETERS = "global_cfm var" STANDARDOUTPUTLEVEL = "">
+	<MvIF EXPR = "{ NOT Load_Global_CFM_ID( l.global_cfm:id, l.current_cfm ) }">
+		<MvASSIGN NAME = "g.Error_Code" VALUE = "id">
+		<MvASSIGN NAME = "g.Error_Message" VALUE = "Could not load Global Custom field.">
+		<MvFUNCTIONRETURN VALUE = 0>
+	</MvIF>
+
+	<MvIF EXPR = "{ ISNULL l.global_cfm:code }">
+		<MvASSIGN NAME = "g.Error_Code" VALUE = "code">
+		<MvASSIGN NAME = "g.Error_Message" VALUE = "Code is required.">
+		<MvFUNCTIONRETURN VALUE = 0>
+	<MvELSEIF EXPR = "{ ( l.global_cfm:code NE l.current_cfm:code ) AND Load_Global_CFM_Code( l.global_cfm:code, l.temp_cfm ) }">
+		<MvASSIGN NAME = "g.Error_Code" VALUE = "code">
+		<MvASSIGN NAME = "g.Error_Message" VALUE = "{ 'The code ' $ l.global_cfm:code $ ' already exist.' }">
+		<MvFUNCTIONRETURN VALUE = 0>
+	</MvIF>
+
+	<MvIF EXPR = "{ ISNULL l.global_cfm:name }">
+		<MvASSIGN NAME = "g.Error_Code" VALUE = "name">
+		<MvASSIGN NAME = "g.Error_Message" VALUE = "Name is required.">
+		<MvFUNCTIONRETURN VALUE = 0>
+	</MvIF>
+
+	<MvFUNCTIONRETURN VALUE = "{ Global_Update_Lowlevel( l.global_cfm ) }">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "Global_Update_Lowlevel" PARAMETERS = "global_cfm var" STANDARDOUTPUTLEVEL = "">
+	<MvQUERY NAME	= "Merchant"
+			 QUERY	= "{ 'UPDATE ' $ g.Store_Table_Prefix $ 'TGCFM_GlobalFields
+					      SET
+							code = ?,
+							name = ?,
+							value = ?
+					      WHERE
+						    id			= ?' }"
+			 FIELDS	= "l.global_cfm:code, l.global_cfm:name, l.global_cfm:value, l.global_cfm:id">
+	<MvIF EXPR = "{ g.MvQUERY_Error }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-0006', g.MvQUERY_Error ) }">
+	</MvIF>
+
+	<MvFUNCTIONRETURN VALUE = 1>
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "Global_Delete" PARAMETERS = "id" STANDARDOUTPUTLEVEL = "">
+	<MvQUERY NAME	= "Merchant"
+			 QUERY	= "{ 'DELETE FROM ' $ g.Store_Table_Prefix $ 'TGCFM_GlobalFields WHERE id = ?' }"
+			 FIELDS	= "l.id">
+	<MvIF EXPR = "{ g.MvQUERY_Error }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Library_Filename_Utilities ].Error( 'TGCFM-ERROR-0007', g.MvQUERY_Error ) }">
 	</MvIF>
 
 	<MvFUNCTIONRETURN VALUE = 1>
@@ -137,5 +216,25 @@
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_FieldError( g.Error_Code, g.Error_Message ) }">
 	</MvIF>
 
+	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_Success() }">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "JSON_Global_Update" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "">
+	<MvASSIGN NAME = "l.global_cfm" MEMBER = "id" VALUE = "{ g.ID }">
+	<MvASSIGN NAME = "l.global_cfm" MEMBER = "code" VALUE = "{ g.Code }">
+	<MvASSIGN NAME = "l.global_cfm" MEMBER = "name" VALUE = "{ g.Name }">
+	<MvASSIGN NAME = "l.global_cfm" MEMBER = "value" VALUE = "{ g.Value }">
+
+	<MvIF EXPR = "{ NOT Global_Update( l.global_cfm ) }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_FieldError( g.Error_Code, g.Error_Message ) }">
+	</MvIF>
+
+	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_Success() }">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "JSON_Global_Delete" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "">
+	<MvIF EXPR = "{ NOT Global_Delete( g.ID ) }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_FieldError( 'code', g.Error_Message ) }">
+	</MvIF>
 	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_Success() }">
 </MvFUNCTION>
