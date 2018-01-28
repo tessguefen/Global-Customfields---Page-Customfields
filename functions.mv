@@ -10,6 +10,10 @@
 	Global_Update_LowLevel( global_cfm var )
 	Global_Delete( id )
 
+	GlobalFieldList_Load_All( fields var )
+	Load_Global_Fields( custom_fields, output var)
+
+
 	JSON_Global_CFS_Load_Query( module var )
 	JSON_Global_Insert( module var )
 	JSON_Global_Update( module var )
@@ -156,6 +160,54 @@
 	<MvFUNCTIONRETURN VALUE = 1>
 </MvFUNCTION>
 
+
+
+<MvFUNCTION NAME = "GlobalFieldList_Load_All" PARAMETERS = "fields var" STANDARDOUTPUTLEVEL = "">
+	<MvOPENVIEW NAME	= "Merchant"
+				VIEW	= "TGCFM_GlobalFields"
+				QUERY	= "{ 'SELECT * FROM ' $ g.Store_Table_Prefix $ 'TGCFM_GlobalFields ORDER BY id' }">
+	<MvIF EXPR = "{ g.MvOPENVIEW_Error }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-0008', g.MvOPENVIEW_Error ) }">
+	</MvIF>
+
+	<MvASSIGN NAME = "l.field_count"		VALUE = 0>
+	<MvWHILE EXPR = "{ NOT TGCFM_GlobalFields.d.EOF }">
+		<MvASSIGN NAME = "l.field_count"	VALUE = "{ l.field_count + 1 }">
+
+		<MvEVAL EXPR = "{ GlobalField_Read( l.fields[ l.field_count ] ) }">
+		<MvSKIP NAME = "Merchant" VIEW = "TGCFM_GlobalFields" ROWS = 1>
+	</MvWHILE>
+
+	<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_GlobalFields">
+	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_DB ].ListLoad_EOF_Return( 'TGCFM-ERROR-0009', l.field_count ) }">
+</MvFUNCTION>
+
+<MvFUNCTION NAME ="Load_Global_Fields" PARAMETERS = "custom_fields, output var" STANDARDOUTPUTLEVEL = "">
+	<MvIF EXPR = "{ ISNULL l.custom_fields }">
+		<MvFOREACH ITERATOR = "l.field" ARRAY = "l.fields" INDEX = "l.pos" COUNT = "{ GlobalFieldList_Load_All( l.fields ) }">			
+			<MvASSIGN NAME = "l.output" INDEX = "{ l.pos }" MEMBER = "code"		VALUE = "{ l.field:code }">
+			<MvASSIGN NAME = "l.output" INDEX = "{ l.pos }" MEMBER = "name"		VALUE = "{ l.field:name }">
+			<MvASSIGN NAME = "l.output" INDEX = "{ l.pos }" MEMBER = "value"	VALUE = "{ l.field:value }">
+		</MvFOREACH>
+	<MvELSE>
+		<MvASSIGN NAME = "l.total_custom_fields" VALUE = "{ miva_splitstring( l.custom_fields, ',', l.custom_field_codes, l.flags ) }">
+
+		<MvIF EXPR = "{ l.total_custom_fields EQ 1 }">
+			<MvIF EXPR = "{ NOT Load_Global_CFM_Code( l.custom_fields, l.current_field ) }">
+				<MvFUNCTIONRETURN VALUE = 0>
+			</MvIF>
+			<MvASSIGN NAME = "l.output" VALUE = "{ l.current_field:value }">
+			<MvFUNCTIONRETURN VALUE = 1>
+		<MvELSE>
+			<MvFOREACH ITERATOR = "l.custom_field_code" ARRAY = "l.custom_field_codes">
+				<MvIF EXPR = "{ Load_Global_CFM_Code( l.custom_field_code, l.current_field ) }">
+					<MvASSIGN NAME = "l.output" MEMBER = "{ l.custom_field_code }" VALUE = "{ l.current_field:value }">
+				</MvIF>
+			</MvFOREACH>
+		</MvIF>
+	</MvIF>
+	<MvFUNCTIONRETURN VALUE = 1>
+</MvFUNCTION>
 
 
 
