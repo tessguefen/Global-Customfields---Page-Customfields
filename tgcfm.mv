@@ -348,4 +348,4 @@
 <MvFUNCTION NAME = "ComponentModule_Render_Start" PARAMETERS = "module var, item, settings var, item_settings var, param" STANDARDOUTPUTLEVEL = "">
 </MvFUNCTION>
 
-<MvINCLUDE FILE = "functions.mv">
+<MvINCLUDE FILE = "global_functions.mv">

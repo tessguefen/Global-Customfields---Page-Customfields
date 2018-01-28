@@ -1,6 +1,6 @@
 <MvCOMMENT>
 	Functions List
-
+Functions
 	GlobalField_Read( output var )
 	Load_Global_CFM_ID( id, output var )
 	Load_Global_CFM_Code( code, output var)
@@ -10,10 +10,11 @@
 	Global_Update_LowLevel( global_cfm var )
 	Global_Delete( id )
 
+Future Item/ MvDO Functions
 	GlobalFieldList_Load_All( fields var )
 	Load_Global_Fields( custom_fields, output var)
 
-
+JSON Functions
 	JSON_Global_CFS_Load_Query( module var )
 	JSON_Global_Insert( module var )
 	JSON_Global_Update( module var )
