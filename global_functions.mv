@@ -1,5 +1,4 @@
 <MvCOMMENT>
-	Functions List
 Functions
 	GlobalField_Read( output var )
 	Load_Global_CFM_ID( id, output var )

@@ -349,3 +349,4 @@
 </MvFUNCTION>
 
 <MvINCLUDE FILE = "global_functions.mv">
+<MvINCLUDE FILE = "page_functions.mv">

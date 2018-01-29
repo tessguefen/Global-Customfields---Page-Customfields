@@ -1,0 +1,19 @@
+<MvCOMMENT>
+Functions
+	PageField_Read( output var )
+	Load_PageField_CFM_ID( id, output var )
+	Load_PageField_CFM_Code( code, output var)
+	PageField_Insert( page_cfm var )
+	PageField_Insert_Lowlevel( page_cfm var )
+	PageField_Update( page_cfm var )
+	PageField_Update_LowLevel( page_cfm var )
+	PageField_Delete( id )
+</MvCOMMENT>
+
+<MvFUNCTION NAME = "PageField_Read" PARAMETERS = "output var" STANDARDOUTPUTLEVEL = "">
+	<MvASSIGN NAME = "l.output:id"			VALUE = "{ TGCFM_GlobalFields.d.id }">
+	<MvASSIGN NAME = "l.output:group_id"	VALUE = "{ TGCFM_GlobalFields.d.group_id }">
+	<MvASSIGN NAME = "l.output:code"		VALUE = "{ TGCFM_GlobalFields.d.code }">
+	<MvASSIGN NAME = "l.output:name"		VALUE = "{ TGCFM_GlobalFields.d.name }">
+	<MvASSIGN NAME = "l.output:fieldtype"		VALUE = "{ TGCFM_GlobalFields.d.fieldtype }">
+</MvFUNCTION>
