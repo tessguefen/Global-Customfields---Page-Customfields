@@ -33,7 +33,7 @@ JSON Functions
 				QUERY	= "{ 'SELECT * FROM ' $ g.Store_Table_Prefix $ 'TGCFM_GlobalFields WHERE id = ?' }"
 				FIELDS	= "l.id">
 	<MvIF EXPR = "{ g.MvOPENVIEW_Error }">
-		<MvFUNCTIONRETURN VALUE = "{ [ g.Library_Filename_Utilities ].Error( 'TGCFM-ERROR-0002', g.MvOPENVIEW_Error ) }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-0002', g.MvOPENVIEW_Error ) }">
 	</MvIF>
 
 	<MvIF EXPR = "{ TGCFM_GlobalFields.d.EOF }">
@@ -53,7 +53,7 @@ JSON Functions
 				QUERY	= "{ 'SELECT * FROM ' $ g.Store_Table_Prefix $ 'TGCFM_GlobalFields WHERE ' $ [ g.Module_Library_Native_DBAPI ].DB_Compare_UPPER( 'code' ) $ ' = ' $ [ g.Module_Library_Native_DBAPI ].DB_Compare_UPPER( '?' ) }"
 				FIELDS	= "l.code">
 	<MvIF EXPR = "{ g.MvOPENVIEW_Error }">
-		<MvFUNCTIONRETURN VALUE = "{ [ g.Library_Filename_Utilities ].Error( 'TGCFM-ERROR-0004', g.MvOPENVIEW_Error ) }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-0004', g.MvOPENVIEW_Error ) }">
 	</MvIF>
 
 	<MvIF EXPR = "{ TGCFM_GlobalFields.d.EOF }">
@@ -154,7 +154,7 @@ JSON Functions
 			 QUERY	= "{ 'DELETE FROM ' $ g.Store_Table_Prefix $ 'TGCFM_GlobalFields WHERE id = ?' }"
 			 FIELDS	= "l.id">
 	<MvIF EXPR = "{ g.MvQUERY_Error }">
-		<MvFUNCTIONRETURN VALUE = "{ [ g.Library_Filename_Utilities ].Error( 'TGCFM-ERROR-0007', g.MvQUERY_Error ) }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-0007', g.MvQUERY_Error ) }">
 	</MvIF>
 
 	<MvFUNCTIONRETURN VALUE = 1>

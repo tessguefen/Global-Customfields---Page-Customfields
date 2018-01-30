@@ -238,13 +238,15 @@
 		<div id="jsTGCFM_GlobalBatchlist"></div>
 		<MvFUNCTIONRETURN VALUE = 1 />
 	</MvIF>
-	<MvIF EXPR = "{ l.tab EQ 'TGCFM_Pages' }">
-		yoooo 1
-		<MvFUNCTIONRETURN VALUE = 1 />
-	</MvIF>
 	<MvIF EXPR = "{ l.tab EQ 'TGCFM_Groups' }">
 		<MvEVAL EXPR = "{ [ g.Module_Admin ].Element_MMBatchList_HTML() }">
 		<div id="jsTGCFM_GroupsBatchlist"></div>
+		<MvFUNCTIONRETURN VALUE = 1 />
+	</MvIF>
+	<MvIF EXPR = "{ l.tab EQ 'TGCFM_Pages' }">
+		<MvEVAL EXPR = "{ [ g.Module_Admin ].Element_MMBatchList_HTML() }">
+		<div id="jsTGCFM_PageFieldsBatchlist"></div>
+		<MvEVAL EXPR = "{ PageField_AddEditDialog_HTML( l.module ) }">
 		<MvFUNCTIONRETURN VALUE = 1 />
 	</MvIF>
 	<MvFUNCTIONRETURN VALUE = 1 />
@@ -266,6 +268,19 @@
 		<script language="JavaScript" src="{ g.clientside_url $ 'Module_Code=' $ encodeattribute( l.module:code ) $ '&Filename=tgcfm_page_groups.js' }"></script>
 		<script language="JavaScript">
 			MMScreen_LoadFinished( function() { new TGCFM_GroupsBatchlist(); } );
+		</script>
+		<MvFUNCTIONRETURN VALUE = 1 />
+	</MvIF>
+	<MvIF EXPR = "{ l.tab EQ 'TGCFM_Pages' }">
+		<MvEVAL EXPR = "{ [ g.Module_Admin ].Element_MMBatchList_JavaScript() }">
+		<MvEVAL EXPR = "{ [ g.Module_Admin ].Element_MMBatchList_CSS() }">
+
+		<MvEVAL EXPR = "{ PageField_AddEditDialog_CSS( l.module ) }">
+
+		<script language="JavaScript" src="{ g.clientside_url $ 'Module_Code=' $ encodeattribute( l.module:code ) $ '&Filename=tgcfm_page_popup.js' }"></script>
+		<script language="JavaScript" src="{ g.clientside_url $ 'Module_Code=' $ encodeattribute( l.module:code ) $ '&Filename=tgcfm_page.js' }"></script>
+		<script language="JavaScript">
+			MMScreen_LoadFinished( function() { new PageFieldList(); } );
 		</script>
 		<MvFUNCTIONRETURN VALUE = 1 />
 	</MvIF>
@@ -299,6 +314,14 @@
 		<MvEVAL EXPR = "{ [ g.Module_Clientside ].Module_Content_Type( l.module, 'text/javascript' ) }">
 		<MvINCLUDE FILE = "js/tgcfm_page_groups.js">
 	</MvIF>
+	<MvIF EXPR = "{ g.Filename EQ 'tgcfm_page.js' }">
+		<MvEVAL EXPR = "{ [ g.Module_Clientside ].Module_Content_Type( l.module, 'text/javascript' ) }">
+		<MvINCLUDE FILE = "js/tgcfm_page.js">
+	</MvIF>
+	<MvIF EXPR = "{ g.Filename EQ 'tgcfm_page_popup.js' }">
+		<MvEVAL EXPR = "{ [ g.Module_Clientside ].Module_Content_Type( l.module, 'text/javascript' ) }">
+		<MvINCLUDE FILE = "js/tgcfm_page_popup.js">
+	</MvIF>
 </MvFUNCTION>
 
 
@@ -311,13 +334,19 @@
 <MvFUNCTION NAME = "Module_JSON" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "">
 	<MvIF EXPR = "{ NOT g.Admin_Open_Store }"><MvFUNCTIONRETURN></MvIF>
 	<MvIF EXPR = "{ g.Module_Function EQ 'JSON_Global_CFS_Load_Query'}"><MvFUNCTIONRETURN VALUE = "{ JSON_Global_CFS_Load_Query( l.module )	}"></MvIF>
-	<MvIF EXPR = "{ g.Module_Function EQ 'TGCFS_Global_Insert' }"><MvFUNCTIONRETURN VALUE = "{ JSON_Global_Insert( l.module )	}"></MvIF>
-	<MvIF EXPR = "{ g.Module_Function EQ 'TGCFS_Global_Update' }"><MvFUNCTIONRETURN VALUE = "{ JSON_Global_Update( l.module )	}"></MvIF>
-	<MvIF EXPR = "{ g.Module_Function EQ 'TGCFS_Global_Delete' }"><MvFUNCTIONRETURN VALUE = "{ JSON_Global_Delete( l.module )	}"></MvIF>
-	<MvIF EXPR = "{ g.Module_Function EQ 'JSON_Groups_Load_Query' }"><MvFUNCTIONRETURN VALUE = "{ JSON_Groups_Load_Query( l.module )	}"></MvIF>
+	<MvIF EXPR = "{ g.Module_Function EQ 'TGCFS_Global_Insert' }"><MvFUNCTIONRETURN VALUE = "{ JSON_Global_Insert( l.module ) }"></MvIF>
+	<MvIF EXPR = "{ g.Module_Function EQ 'TGCFS_Global_Update' }"><MvFUNCTIONRETURN VALUE = "{ JSON_Global_Update( l.module ) }"></MvIF>
+	<MvIF EXPR = "{ g.Module_Function EQ 'TGCFS_Global_Delete' }"><MvFUNCTIONRETURN VALUE = "{ JSON_Global_Delete( l.module ) }"></MvIF>
+
+	<MvIF EXPR = "{ g.Module_Function EQ 'JSON_Groups_Load_Query' }"><MvFUNCTIONRETURN VALUE = "{ JSON_Groups_Load_Query( l.module ) }"></MvIF>
 	<MvIF EXPR = "{ g.Module_Function EQ 'TGCFS_Group_Insert' }"><MvFUNCTIONRETURN VALUE = "{ JSON_Group_Insert( l.module )	}"></MvIF>
 	<MvIF EXPR = "{ g.Module_Function EQ 'TGCFS_Group_Update' }"><MvFUNCTIONRETURN VALUE = "{ JSON_Group_Update( l.module )	}"></MvIF>
 	<MvIF EXPR = "{ g.Module_Function EQ 'TGCFS_Group_Delete' }"><MvFUNCTIONRETURN VALUE = "{ JSON_Group_Delete( l.module )	}"></MvIF>
+
+	<MvIF EXPR = "{ g.Module_Function EQ 'JSON_PageFields_Load_Query' }"><MvFUNCTIONRETURN VALUE = "{ JSON_PageFields_Load_Query( l.module ) }"></MvIF>
+	<MvIF EXPR = "{ g.Module_Function EQ 'PageField_Insert' }"><MvFUNCTIONRETURN VALUE = "{ JSON_PageField_Insert( l.module ) }"></MvIF>
+
+	<MvIF EXPR = "{ g.Module_Function EQ 'JSON_GroupList_Load_All' }"><MvFUNCTIONRETURN VALUE = "{ JSON_GroupList_Load_All( l.module ) }"></MvIF>
 </MvFUNCTION>
 
 
@@ -367,4 +396,5 @@
 </MvFUNCTION>
 
 <MvINCLUDE FILE = "global_functions.mv">
+<MvINCLUDE FILE = "group_functions.mv">
 <MvINCLUDE FILE = "page_functions.mv">

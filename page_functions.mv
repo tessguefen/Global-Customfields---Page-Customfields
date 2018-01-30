@@ -1,157 +1,179 @@
 <MvCOMMENT>
-Page Customfields Functions
+Page Functions
 	PageField_Read( output var )
-	Load_PageField_CFM_ID( id, output var )
-	Load_PageField_CFM_Code( code, output var)
-	PageField_Insert( page_cfm var )
-	PageField_Insert_Lowlevel( page_cfm var )
-	PageField_Update( page_cfm var )
-	PageField_Update_LowLevel( page_cfm var )
+	Load_PageField_ID( id, output var )
+	Load_PageField_Code( code, output var)
+	PageField_Insert( pagefield var  )
+	PageField_Insert_Lowlevel( pagefield var" )
+	PageField_Update( pagefield var )
+	PageField_Update_Lowlevel( pagefield var )
 	PageField_Delete( id )
 
-Group Functions
+JSON Functions
+	JSON_PageFields_Load_Query( module var )
+	JSON_PageField_Insert( module var )
+	JSON_PageField_Update( module var )
+	JSON_PageField_Delete( module var )
+
+Batchlist Functions/ HTML
+	PageField_AddEditDialog_CSS( module var )
+	PageField_AddEditDialog_HTML( module var )
 	JSON_Groups_Load_Query( module var )
+	JSON_Formatted_Group( group_id )
+	Formatted_Group( group_id )
+	JSON_Formatted_Fieldtype( fieldtype )
+	Formatted_Fieldtype( fieldtype )
 </MvCOMMENT>
 
-<MvFUNCTION NAME = "Group_Read" PARAMETERS = "output var" STANDARDOUTPUTLEVEL = "">
-	<MvASSIGN NAME = "l.output:id"		VALUE = "{ TGCFM_Groups.d.id }">
-	<MvASSIGN NAME = "l.output:code"	VALUE = "{ TGCFM_Groups.d.code }">
-	<MvASSIGN NAME = "l.output:name"	VALUE = "{ TGCFM_Groups.d.name }">>
+<MvFUNCTION NAME = "PageField_Read" PARAMETERS = "output var" STANDARDOUTPUTLEVEL = "">
+	<MvASSIGN NAME = "l.output:id"		VALUE = "{ PageFields.d.id }">
+	<MvASSIGN NAME = "l.output:group_id"	VALUE = "{ PageFields.d.group_id }">
+	<MvASSIGN NAME = "l.output:code"	VALUE = "{ PageFields.d.code }">
+	<MvASSIGN NAME = "l.output:name"	VALUE = "{ PageFields.d.name }">
+	<MvASSIGN NAME = "l.output:fieldtype"	VALUE = "{ PageFields.d.fieldtype }">
+	<MvASSIGN NAME = "l.output:info"	VALUE = "{ PageFields.d.info }">
 </MvFUNCTION>
 
-<MvFUNCTION NAME = "Load_Group_ID" PARAMETERS = "id, output var" STANDARDOUTPUTLEVEL = "">
+<MvFUNCTION NAME = "Load_PageField_ID" PARAMETERS = "id, output var" STANDARDOUTPUTLEVEL = "">
 	<MvOPENVIEW NAME	= "Merchant"
-				VIEW	= "TGCFM_Groups"
-				QUERY	= "{ 'SELECT * FROM ' $ g.Store_Table_Prefix $ 'TGCFM_Groups WHERE id = ?' }"
+				VIEW	= "PageFields"
+				QUERY	= "{ 'SELECT * FROM ' $ g.Store_Table_Prefix $ 'TGCFM_PageFields WHERE id = ?' }"
 				FIELDS	= "l.id">
 	<MvIF EXPR = "{ g.MvOPENVIEW_Error }">
-		<MvFUNCTIONRETURN VALUE = "{ [ g.Library_Filename_Utilities ].Error( 'TGCFM-ERROR-1002', g.MvOPENVIEW_Error ) }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-2002', g.MvOPENVIEW_Error ) }">
 	</MvIF>
 
-	<MvIF EXPR = "{ TGCFM_Groups.d.EOF }">
-		<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_Groups">
-		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_DB ].Error_Load_EOF( 'TGCFM-ERROR-1003' ) }">
+	<MvIF EXPR = "{ PageFields.d.EOF }">
+		<MvCLOSEVIEW NAME = "Merchant" VIEW = "PageFields">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_DB ].Error_Load_EOF( 'TGCFM-ERROR-2003' ) }">
 	</MvIF>
 
-	<MvEVAL EXPR = "{ Group_Read( l.output ) }">
-	<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_Groups">
+	<MvEVAL EXPR = "{ PageField_Read( l.output ) }">
+	<MvCLOSEVIEW NAME = "Merchant" VIEW = "PageFields">
 
 	<MvFUNCTIONRETURN VALUE = 1>
 </MvFUNCTION>
 
-<MvFUNCTION NAME = "Load_Group_Code" PARAMETERS = "code, output var" STANDARDOUTPUTLEVEL = "">
+<MvFUNCTION NAME = "Load_PageField_Code" PARAMETERS = "code, output var" STANDARDOUTPUTLEVEL = "">
 	<MvOPENVIEW NAME	= "Merchant"
-				VIEW	= "TGCFM_Groups"
-				QUERY	= "{ 'SELECT * FROM ' $ g.Store_Table_Prefix $ 'TGCFM_Groups WHERE ' $ [ g.Module_Library_Native_DBAPI ].DB_Compare_UPPER( 'code' ) $ ' = ' $ [ g.Module_Library_Native_DBAPI ].DB_Compare_UPPER( '?' ) }"
+				VIEW	= "PageFields"
+				QUERY	= "{ 'SELECT * FROM ' $ g.Store_Table_Prefix $ 'TGCFM_PageFields WHERE ' $ [ g.Module_Library_Native_DBAPI ].DB_Compare_UPPER( 'code' ) $ ' = ' $ [ g.Module_Library_Native_DBAPI ].DB_Compare_UPPER( '?' ) }"
 				FIELDS	= "l.code">
 	<MvIF EXPR = "{ g.MvOPENVIEW_Error }">
-		<MvFUNCTIONRETURN VALUE = "{ [ g.Library_Filename_Utilities ].Error( 'TGCFM-ERROR-1004', g.MvOPENVIEW_Error ) }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-2004', g.MvOPENVIEW_Error ) }">
 	</MvIF>
 
-	<MvIF EXPR = "{ TGCFM_Groups.d.EOF }">
-		<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_Groups">
-		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_DB ].Error_Load_EOF( 'TGCFM-ERROR-1005' ) }">
+	<MvIF EXPR = "{ PageFields.d.EOF }">
+		<MvCLOSEVIEW NAME = "Merchant" VIEW = "PageFields">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_DB ].Error_Load_EOF( 'TGCFM-ERROR-2005' ) }">
 	</MvIF>
 
-	<MvEVAL EXPR = "{ Group_Read( l.output ) }">
-	<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_Groups">
+	<MvEVAL EXPR = "{ PageField_Read( l.output ) }">
+	<MvCLOSEVIEW NAME = "Merchant" VIEW = "PageFields">
 
 	<MvFUNCTIONRETURN VALUE = 1>
 </MvFUNCTION>
 
-<MvFUNCTION NAME = "Group_Insert" PARAMETERS = "group var" STANDARDOUTPUTLEVEL = "">
-	<MvASSIGN NAME = "l.group" MEMBER = "code" VALUE = "{ trim( l.group:code ) }">
-	<MvASSIGN NAME = "l.group" MEMBER = "name" VALUE = "{ trim( l.group:name ) }">
+<MvFUNCTION NAME = "PageField_Insert" PARAMETERS = "pagefield var" STANDARDOUTPUTLEVEL = "">
+	<MvASSIGN NAME = "l.pagefield" MEMBER = "code" VALUE = "{ trim( l.pagefield:code ) }">
+	<MvASSIGN NAME = "l.pagefield" MEMBER = "name" VALUE = "{ trim( l.pagefield:name ) }">
 
-	<MvIF EXPR = "{ ISNULL l.group:code }">
+	<MvCOMMENT>
+		Check group_id && fieldtype
+	</MvCOMMENT>
+
+	<MvIF EXPR = "{ ISNULL l.pagefield:code }">
 		<MvASSIGN NAME = "g.Error_Code" VALUE = "code">
 		<MvASSIGN NAME = "g.Error_Message" VALUE = "Code is required.">
 		<MvFUNCTIONRETURN VALUE = 0>
-	<MvELSEIF EXPR = "{ Load_Group_Code( l.group:code, l.temp_cfm ) }">
+	<MvELSEIF EXPR = "{ Load_PageField_Code( l.pagefield:code, l.temp_cfm ) }">
 		<MvASSIGN NAME = "g.Error_Code" VALUE = "code">
-		<MvASSIGN NAME = "g.Error_Message" VALUE = "{ 'The code ' $ l.group:code $ ' already exist.' }">
+		<MvASSIGN NAME = "g.Error_Message" VALUE = "{ 'The code ' $ l.pagefield:code $ ' already exist.' }">
 		<MvFUNCTIONRETURN VALUE = 0>
 	</MvIF>
 
-	<MvIF EXPR = "{ ISNULL l.group:name }">
+	<MvIF EXPR = "{ ISNULL l.pagefield:name }">
 		<MvASSIGN NAME = "g.Error_Code" VALUE = "name">
 		<MvASSIGN NAME = "g.Error_Message" VALUE = "Name is required.">
 		<MvFUNCTIONRETURN VALUE = 0>
 	</MvIF>
 
-	<MvFUNCTIONRETURN VALUE = "{ Group_Insert_Lowlevel( l.group ) }">
+	<MvFUNCTIONRETURN VALUE = "{ PageField_Insert_Lowlevel( l.pagefield ) }">
 </MvFUNCTION>
 
-<MvFUNCTION NAME = "Group_Insert_Lowlevel" PARAMETERS = "group var" STANDARDOUTPUTLEVEL = "">
-	<MvASSIGN NAME = "l.group" MEMBER = "id" VALUE = "{ [ g.Module_Library_DB ].StoreKey_Generate( 'TGCFM_Groups' ) }">
+<MvFUNCTION NAME = "PageField_Insert_Lowlevel" PARAMETERS = "pagefield var" STANDARDOUTPUTLEVEL = "">
+	<MvASSIGN NAME = "l.pagefield" MEMBER = "id" VALUE = "{ [ g.Module_Library_DB ].StoreKey_Generate( 'TGCFM_Fields' ) }">
 	<MvQUERY NAME	= "Merchant"
-			 QUERY	= "{ 'INSERT INTO ' $ g.Store_Table_Prefix $ 'TGCFM_Groups
-					      ( id, code, name )
+			 QUERY	= "{ 'INSERT INTO ' $ g.Store_Table_Prefix $ 'TGCFM_PageFields
+					      ( id, group_id, code, name, fieldtype, info )
 						  VALUES
-						  ( ?, ?, ? )' }"
-			 FIELDS	= "l.group:id, l.group:code, l.group:name">
+						  ( ?, ?, ?, ?, ?, ? )' }"
+			 FIELDS	= "l.pagefield:id, l.pagefield:group_id, l.pagefield:code, l.pagefield:name, l.pagefield:fieldtype, l.pagefield:info">
 	<MvIF EXPR = "{ g.MvQUERY_Error }">
-		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-1001', g.MvQUERY_Error ) }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-2001', g.MvQUERY_Error ) }">
 	</MvIF>
 
 	<MvFUNCTIONRETURN VALUE = 1>
 </MvFUNCTION>
 
-<MvFUNCTION NAME = "Group_Update" PARAMETERS = "group var" STANDARDOUTPUTLEVEL = "">
-	<MvIF EXPR = "{ NOT Load_Group_ID( l.group:id, l.current_cfm ) }">
+<MvFUNCTION NAME = "PageField_Update" PARAMETERS = "pagefield var" STANDARDOUTPUTLEVEL = "">
+	<MvIF EXPR = "{ NOT Load_PageField_ID( l.pagefield:id, l.current_cfm ) }">
 		<MvASSIGN NAME = "g.Error_Code" VALUE = "id">
 		<MvASSIGN NAME = "g.Error_Message" VALUE = "Could not load Group.">
 		<MvFUNCTIONRETURN VALUE = 0>
 	</MvIF>
 
-	<MvIF EXPR = "{ ISNULL l.group:code }">
+	<MvIF EXPR = "{ ISNULL l.pagefield:code }">
 		<MvASSIGN NAME = "g.Error_Code" VALUE = "code">
 		<MvASSIGN NAME = "g.Error_Message" VALUE = "Code is required.">
 		<MvFUNCTIONRETURN VALUE = 0>
-	<MvELSEIF EXPR = "{ ( l.group:code NE l.current_cfm:code ) AND Load_Group_Code( l.group:code, l.temp_cfm ) }">
+	<MvELSEIF EXPR = "{ ( l.pagefield:code NE l.current_cfm:code ) AND Load_PageField_Code( l.pagefield:code, l.temp_cfm ) }">
 		<MvASSIGN NAME = "g.Error_Code" VALUE = "code">
-		<MvASSIGN NAME = "g.Error_Message" VALUE = "{ 'The code ' $ l.group:code $ ' already exist.' }">
+		<MvASSIGN NAME = "g.Error_Message" VALUE = "{ 'The code ' $ l.pagefield:code $ ' already exist.' }">
 		<MvFUNCTIONRETURN VALUE = 0>
 	</MvIF>
 
-	<MvIF EXPR = "{ ISNULL l.group:name }">
+	<MvIF EXPR = "{ ISNULL l.pagefield:name }">
 		<MvASSIGN NAME = "g.Error_Code" VALUE = "name">
 		<MvASSIGN NAME = "g.Error_Message" VALUE = "Name is required.">
 		<MvFUNCTIONRETURN VALUE = 0>
 	</MvIF>
 
-	<MvFUNCTIONRETURN VALUE = "{ Group_Update_Lowlevel( l.group ) }">
+	<MvFUNCTIONRETURN VALUE = "{ PageField_Update_Lowlevel( l.pagefield ) }">
 </MvFUNCTION>
 
-<MvFUNCTION NAME = "Group_Update_Lowlevel" PARAMETERS = "group var" STANDARDOUTPUTLEVEL = "">
+<MvFUNCTION NAME = "PageField_Update_Lowlevel" PARAMETERS = "pagefield var" STANDARDOUTPUTLEVEL = "">
 	<MvQUERY NAME	= "Merchant"
-			 QUERY	= "{ 'UPDATE ' $ g.Store_Table_Prefix $ 'TGCFM_Groups
+			 QUERY	= "{ 'UPDATE ' $ g.Store_Table_Prefix $ 'TGCFM_PageFields
 					      SET
 							code = ?,
-							name = ?
+							group_id = ?,
+							name = ?,
+							fieldtype = ?,
+							info = ?
 					      WHERE
 						    id			= ?' }"
-			 FIELDS	= "l.group:code, l.group:name, l.group:id">
+			 FIELDS	= "l.pagefield:id, l.pagefield:group_id, l.pagefield:code, l.pagefield:name, l.pagefield:fieldtype, l.pagefield:info, l.pagefield:id">
 	<MvIF EXPR = "{ g.MvQUERY_Error }">
-		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-1006', g.MvQUERY_Error ) }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-2006', g.MvQUERY_Error ) }">
 	</MvIF>
 
 	<MvFUNCTIONRETURN VALUE = 1>
 </MvFUNCTION>
 
-<MvFUNCTION NAME = "Group_Delete" PARAMETERS = "id" STANDARDOUTPUTLEVEL = "">
+<MvFUNCTION NAME = "PageField_Delete" PARAMETERS = "id" STANDARDOUTPUTLEVEL = "">
 	<MvQUERY NAME	= "Merchant"
-			 QUERY	= "{ 'DELETE FROM ' $ g.Store_Table_Prefix $ 'TGCFM_Groups WHERE id = ?' }"
+			 QUERY	= "{ 'DELETE FROM ' $ g.Store_Table_Prefix $ 'TGCFM_PageFields WHERE id = ?' }"
 			 FIELDS	= "l.id">
 	<MvIF EXPR = "{ g.MvQUERY_Error }">
-		<MvFUNCTIONRETURN VALUE = "{ [ g.Library_Filename_Utilities ].Error( 'TGCFM-ERROR-1007', g.MvQUERY_Error ) }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-2007', g.MvQUERY_Error ) }">
 	</MvIF>
 
 	<MvFUNCTIONRETURN VALUE = 1>
 </MvFUNCTION>
 
 
-<MvFUNCTION NAME = "JSON_Groups_Load_Query" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "text, html, compresswhitespace">
+<MvFUNCTION NAME = "JSON_PageFields_Load_Query" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "text, html, compresswhitespace">
 	<MvASSIGN NAME = "g.Filter"			VALUE = "{ trim( g.Filter ) }">
 	<MvASSIGN NAME = "g.Sort"			VALUE = "{ trim( g.Sort ) }">
 	<MvASSIGN NAME = "g.Offset"			VALUE = "{ trim( g.Offset ) }">
@@ -160,18 +182,18 @@ Group Functions
 
 	<MvEVAL EXPR = "{ [ g.Module_Library_DB ].SQL_Query_SELECT( l.search_query,'s.*' ) }">
 
-	<MvEVAL EXPR = "{ [ g.Module_Library_DB ].SQL_Query_FROM( l.search_query, g.Store_Table_Prefix $ 'TGCFM_Groups', 's' ) }">
+	<MvEVAL EXPR = "{ [ g.Module_Library_DB ].SQL_Query_FROM( l.search_query, g.Store_Table_Prefix $ 'TGCFM_PageFields', 's' ) }">
 
-	<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_Filter( l.search_query, g.Filter,'id:s.id,code:s.code,name:s.name' ) }">
+	<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_Filter( l.search_query, g.Filter,'id:s.id,group_id:s.group_id,code:s.code,name:s.name,fieldtype:s.fieldtype,info:s.info' ) }">
 
-	<MvEVAL EXPR = "{ [ g.Module_Library_DB ].SQL_Query_OrderBy_Fields(l.search_query, g.Sort, 'id:s.id,code:s.code,name:s.name', 's.id' ) }">
+	<MvEVAL EXPR = "{ [ g.Module_Library_DB ].SQL_Query_OrderBy_Fields(l.search_query, g.Sort, 'id:s.id,group_id:s.group_id,code:s.code,name:s.name,fieldtype:s.fieldtype,info:s.info', 's.id' ) }">
 
 	<MvASSIGN NAME = "l.search_sql" VALUE = "{ [ g.Module_Library_DB].SQL_Query_Build( l.search_query, l.search_fields ) }">
 
 	<MvIF EXPR = "{ NOT [ g.Module_Library_DB ].SQL_Query_Count( l.search_query, l.total_count ) }">
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_Error(g.Error_Code, g.Error_Message ) }">
-	<MvELSEIF EXPR = "{ NOT [ g.Module_Library_Native_DBAPI ].DB_OPENVIEW_Range('Merchant', 'TGCFM_Groups', l.search_sql, l.search_fields, g.Offset, g.Count) }">
-		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_Error( 'TGCFM-JSON-0002', g.MvOPENVIEW_Error ) }">
+	<MvELSEIF EXPR = "{ NOT [ g.Module_Library_Native_DBAPI ].DB_OPENVIEW_Range('Merchant', 'TGCFM_PageFields', l.search_sql, l.search_fields, g.Offset, g.Count) }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_Error( 'TGCFM-JSON-0003', g.MvOPENVIEW_Error ) }">
 	</MvIF>
 
 	<MvASSIGN NAME = "l.count" VALUE = 0>
@@ -180,50 +202,218 @@ Group Functions
 		{
 			"data":
 				[
-					<MvWHILE EXPR = "{ ( NOT TGCFM_Groups.d.EOF ) AND ( ( g.Count EQ 0 ) OR (l.count LT g.Count ) ) }">
+					<MvWHILE EXPR = "{ ( NOT TGCFM_PageFields.d.EOF ) AND ( ( g.Count EQ 0 ) OR (l.count LT g.Count ) ) }">
 					<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_ArrayElement_Start( l.count )}">
-					"id": <MvEVAL EXPR = "{ int( TGCFM_Groups.d.id ) }">,
-					"code" : "<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_Encode( TGCFM_Groups.d.code ) }">",
-					"name" : "<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_Encode( TGCFM_Groups.d.name ) }">"
+					"id": <MvEVAL EXPR = "{ int( TGCFM_PageFields.d.id ) }">,
+					"group_id": <MvEVAL EXPR = "{ int( TGCFM_PageFields.d.group_id ) }">,
+					"formatted_group": "<MvEVAL EXPR = "{ JSON_Formatted_Group( TGCFM_PageFields.d.group_id ) }">",
+					"code" : "<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_Encode( TGCFM_PageFields.d.code ) }">",
+					"name" : "<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_Encode( TGCFM_PageFields.d.name ) }">",
+					"fieldtype" : "<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_Encode( TGCFM_PageFields.d.fieldtype ) }">",
+					"formatted_fieldtype" : "<MvEVAL EXPR = "{ JSON_Formatted_Fieldtype( TGCFM_PageFields.d.fieldtype ) }">",
+					"info" : "<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_Encode( TGCFM_PageFields.d.info ) }">",
+					"additional_options":
+					[
+						<MvASSIGN NAME = "l.add_count" VALUE = 0>
+						
+						<MvFOREACH ITERATOR = "l.option" ARRAY = "l.options">
+							<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_ArrayElement_Start( l.add_count ) }">
+							"id":		<MvEVAL EXPR = "{ l.option:id }">,
+							"field_id":	<MvEVAL EXPR = "{ l.option:field_id }">,
+							"type":		"<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_Encode( l.option:type ) }">",
+							"value":	"<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_Encode( l.option:value ) }">"
+							<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_ArrayElement_End() }">
+						</MvFOREACH>
+					]
 					<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_ArrayElement_End() }">
-					<MvSKIP NAME = "Merchant" VIEW = "TGCFM_Groups" ROWS = 1>
+					<MvSKIP NAME = "Merchant" VIEW = "TGCFM_PageFields" ROWS = 1>
 					</MvWHILE>
 				],
 
 			"total_count": <MvEVAL EXPR = "{ int( l.total_count ) }">,
 			"start_offset": <MvEVAL EXPR = "{ int( g.Offset ) }">
 		}
-		<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_Groups">
+		<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_PageFields">
 	}
 
 </MvFUNCTION>
 
-<MvFUNCTION NAME = "JSON_Group_Insert" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "">
-	<MvASSIGN NAME = "l.global_cfm" MEMBER = "code" VALUE = "{ g.Code }">
-	<MvASSIGN NAME = "l.global_cfm" MEMBER = "name" VALUE = "{ g.Name }">
+<MvFUNCTION NAME = "JSON_PageField_Insert" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "">
+	<MvASSIGN NAME = "l.pagefield" MEMBER = "code" VALUE = "{ g.Code }">
+	<MvASSIGN NAME = "l.pagefield" MEMBER = "group_id" VALUE = "{ int( g.Group_ID ) }">
+	<MvASSIGN NAME = "l.pagefield" MEMBER = "name" VALUE = "{ g.Name }">
+	<MvASSIGN NAME = "l.pagefield" MEMBER = "options" VALUE = "{ g.Option_Values }">
+	<MvASSIGN NAME = "l.pagefield" MEMBER = "info" VALUE = "{ g.Info }">
+	<MvASSIGN NAME = "l.pagefield" MEMBER = "fieldtype" VALUE = "{ g.Field_Type }">
 
-	<MvIF EXPR = "{ NOT Group_Insert( l.global_cfm ) }">
+	<MvIF EXPR = "{ NOT PageField_Insert( l.pagefield ) }">
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_FieldError( g.Error_Code, g.Error_Message ) }">
 	</MvIF>
 
 	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_Success() }">
 </MvFUNCTION>
 
-<MvFUNCTION NAME = "JSON_Group_Update" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "">
+<MvFUNCTION NAME = "JSON_PageField_Update" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "">
 	<MvASSIGN NAME = "l.global_cfm" MEMBER = "id" VALUE = "{ g.ID }">
 	<MvASSIGN NAME = "l.global_cfm" MEMBER = "code" VALUE = "{ g.Code }">
 	<MvASSIGN NAME = "l.global_cfm" MEMBER = "name" VALUE = "{ g.Name }">
 
-	<MvIF EXPR = "{ NOT Group_Update( l.global_cfm ) }">
+	<MvIF EXPR = "{ NOT PageField_Update( l.global_cfm ) }">
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_FieldError( g.Error_Code, g.Error_Message ) }">
 	</MvIF>
 
 	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_Success() }">
 </MvFUNCTION>
 
-<MvFUNCTION NAME = "JSON_Group_Delete" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "">
-	<MvIF EXPR = "{ NOT Group_Delete( g.ID ) }">
+<MvFUNCTION NAME = "JSON_PageField_Delete" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "">
+	<MvIF EXPR = "{ NOT PageField_Delete( g.ID ) }">
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_FieldError( 'code', g.Error_Message ) }">
 	</MvIF>
 	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_Success() }">
+</MvFUNCTION>
+
+
+<MvCOMMENT>
+	For BATCHLIST
+</MvCOMMENT>
+
+<MvFUNCTION NAME = "PageField_AddEditDialog_CSS" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "text, html, compresswhitespace">
+	<MvIF EXPR = "{ g.PageField_AddEditDialog_CSS }">
+		<MvFUNCTIONRETURN>
+	</MvIF>
+
+	<style type="text/css">
+		#pagefield_addeditdialog
+		{
+			top: 25px;
+			left: 25px;
+			position: absolute;
+			min-width: 350px;
+			max-width: 800px;
+		}
+
+		.pagefield_addeditdialog_information
+		{
+			width: 265px;
+		}
+	</style>
+
+	<MvEVAL EXPR = "{ [ g.Module_Admin ].Element_Modal_CSS() }">
+
+	<MvASSIGN NAME = "g.PageField_AddEditDialog_CSS" VALUE = 1>
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "PageField_AddEditDialog_HTML" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "text, html, compresswhitespace">
+	<MvIF EXPR = "{ g.PageField_AddEditDialog_HTML }">
+		<MvFUNCTIONRETURN>
+	</MvIF>
+
+	<div id="pagefield_addeditdialog" class="mm_dialog">
+		<div id="pagefield_addeditdialog_title" class="mm_dialog_title">Add/Edit Custom Field</div>
+		<div class="mm_dialog_clear"></div>
+		<table class="mm_dialog_table">
+			<tbody>
+				<tr>
+					<td class="mm_dialog_prompt_required">Code:</td>
+					<td>
+						<input id="pagefield_addeditdialog_edit_code" type="text" size="20">
+					</td>
+				</tr>
+				<tr>
+					<td class="mm_dialog_prompt_required">Name:</td>
+					<td>
+						<input id="pagefield_addeditdialog_name" type="text" size="40">
+					</td>
+				</tr>
+			</tbody>
+
+			<tbody>
+				<tr>
+					<td class="mm_dialog_required">Field Type:</td>
+					<td>
+						<select id="pagefield_addeditdialog_fieldtype">
+							<option value="textfield">Text Field</option>
+							<option value="textarea">Text Area</option>
+							<option value="radio">Radio Button</option>
+							<option value="dropdown">Drop-Down List</option>
+							<option value="checkbox">Checkbox</option>
+							<option value="imageupload">Image Upload</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td class="mm_dialog_required">Group:</td>
+					<td>
+						<select id="pagefield_addeditdialog_group"></select>
+					</td>
+				</tr>
+				<tr>
+					<td class="mm_dialog_prompt">Additional Information:</td>
+					<td>
+						<textarea rows="5" class="pagefield_addeditdialog_information" id="pagefield_addeditdialog_info"></textarea>
+					</td>
+				</tr>
+			</tbody>
+
+			<tbody id="pagefield_addeditdialog_options_table">
+				<tr>
+					<td nowrap class="mm_dialog_prompt">Values:</td>
+					<td>Adding, updating, or removing these values will not affect<br />the values already assigned to products, categories,<br />customers, or orders</td>
+				</tr>
+				<tr>
+					<td>&nbsp;</td>
+					<td>
+						<input id="pagefield_addeditparameter_value" type="text" /><input type="button" id="pagefield_addeditparameter_add" value="Add Value" />
+					</td>
+				</tr>
+			</tbody>
+			
+			<tbody id="pagefield_addeditdialog_options">
+			</tbody>
+		</table>
+
+		<div class="mm_dialog_buttons_left">
+			<input id="pagefield_addeditdialog_button_cancel" type="button" value="Cancel">
+			<input id="pagefield_addeditdialog_button_delete" type="button" value="Delete">
+		</div>
+		<div class="mm_dialog_buttons_right">
+			<input id="pagefield_addeditdialog_button_save" type="button" value="Save">
+			<input id="pagefield_addeditdialog_button_addplus" type="button" value="Add +">
+		</div>
+	</div>
+
+	<MvEVAL EXPR = "{ [ g.Module_Admin ].Element_Modal_HTML() }">
+
+	<MvASSIGN NAME = "g.PageField_AddEditDialog_HTML" VALUE = 1>
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "JSON_Formatted_Group" PARAMETERS = "group_id" STANDARDOUTPUTLEVEL = "">
+	<MvASSIGN NAME = "l.group" VALUE = "{ Formatted_Group( l.group_id ) }">
+	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Encode( l.group ) }">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "Formatted_Group" PARAMETERS = "group_id" STANDARDOUTPUTLEVEL = "">
+	<MvIF EXPR = "{ l.group_id EQ 0 }">
+		<MvFUNCTIONRETURN VALUE = "Default">
+	</MvIF>
+	<MvIF EXPR = "{ NOT Load_Group_ID( l.group_id, l.group ) }">
+		<MvFUNCTIONRETURN VALUE = "Default">
+	</MvIF>
+	<MvFUNCTIONRETURN VALUE = "{ l.group:name }">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "JSON_Formatted_Fieldtype" PARAMETERS = "fieldtype" STANDARDOUTPUTLEVEL = "">
+	<MvASSIGN NAME = "l.field" VALUE = "{ Formatted_Fieldtype( l.fieldtype ) }">
+	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Encode( l.field ) }">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "Formatted_Fieldtype" PARAMETERS = "fieldtype" STANDARDOUTPUTLEVEL = "">
+	<MvIF EXPR = "{ l.fieldtype EQ 'textfield' }">			<MvFUNCTIONRETURN VALUE = "Text Field">
+	<MvELSEIF EXPR = "{ l.fieldtype EQ 'textarea' }">		<MvFUNCTIONRETURN VALUE = "Text Area">
+	<MvELSEIF EXPR = "{ l.fieldtype EQ 'radio' }">			<MvFUNCTIONRETURN VALUE = "Radio">
+	<MvELSEIF EXPR = "{ l.fieldtype EQ 'dropdown' }">		<MvFUNCTIONRETURN VALUE = "Drop-Down List">
+	<MvELSEIF EXPR = "{ l.fieldtype EQ 'checkbox' }">		<MvFUNCTIONRETURN VALUE = "Checkbox">
+	<MvELSEIF EXPR = "{ l.fieldtype EQ 'imageupload' }">	<MvFUNCTIONRETURN VALUE = "Image Upload">	
+	<MvELSE>												<MvFUNCTIONRETURN VALUE = "Unknown">	
+	</MvIF>
 </MvFUNCTION>
