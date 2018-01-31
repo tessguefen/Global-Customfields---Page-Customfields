@@ -3,11 +3,50 @@ Functions
 	PageFieldAndValueList_Load_Group( page_id, group_id, fields var )
 </MvCOMMENT>
 
+<MvFUNCTION NAME = "PageField_Initialize" PARAMETERS = "page_id, all_settings var" STANDARDOUTPUTLEVEL = "">
+	<MvFOREACH ITERATOR = "l.field" ARRAY = "l.fields" COUNT = "{ PageFieldAndValueList_Load_All( l.page_id, l.fields ) }">
+		<MvASSIGN NAME = "l.all_settings:page:customfield_values:customfields" MEMBER = "{ l.field:code }" VALUE = "{ l.field:value }">
+	</MvFOREACH>
+</MvFUNCTION>
+
+
+<MvFUNCTION NAME = "PageFieldAndValueList_Load_All" PARAMETERS = "page_id, fields var" STANDARDOUTPUTLEVEL = "" ERROROUTPUTLEVEL = "">
+	<MvOPENVIEW NAME	= "Merchant"
+				VIEW	= "PageFields"
+				QUERY	= "{ 'SELECT
+								pf.*, pv.value
+							  FROM ' $
+								g.Store_Table_Prefix $ 'TGCFM_PageFields pf
+								LEFT OUTER JOIN ' $ g.Store_Table_Prefix $ 'TGCFM_PageValues pv ON ( pv.field_id = pf.id )
+							  WHERE
+								pv.page_id = ?
+							  ORDER BY
+								pf.name' }"
+				FIELDS	= "l.page_id">
+	<MvIF EXPR = "{ g.MvOPENVIEW_Error }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-4001', g.MvOPENVIEW_Error ) }">
+	</MvIF>
+
+	<MvASSIGN NAME = "l.field_count" VALUE = 0>
+
+	<MvWHILE EXPR = "{ NOT PageFields.d.EOF }">
+		<MvASSIGN NAME = "l.field_count" VALUE = "{ l.field_count + 1 }">
+
+		<MvEVAL EXPR = "{ PageField_Read( l.fields[ l.field_count ] ) }">
+		<MvASSIGN NAME = "l.fields" INDEX = "{ l.field_count }" MEMBER = "value" VALUE = "{ PageFields.d.value }">
+
+		<MvSKIP NAME = "Merchant" VIEW = "PageFields" ROWS = 1>
+	</MvWHILE>
+
+	<MvCLOSEVIEW NAME = "Merchant" VIEW = "PageFields">
+	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_DB ].ListLoad_EOF_Return( 'TGCFM-ERROR-4002', l.field_count ) }">
+</MvFUNCTION>
+
 <MvFUNCTION NAME = "PageFieldAndValueList_Load_Group" PARAMETERS = "page_id, group_id, fields var" STANDARDOUTPUTLEVEL = "" ERROROUTPUTLEVEL = "">
 	<MvOPENVIEW NAME	= "Merchant"
-				VIEW	= "TGCFM_PageValues"
+				VIEW	= "PageFields"
 				QUERY	= "{ 'SELECT
-								pf.*, pv.value, pv.value_long
+								pf.*, pv.value
 							  FROM ' $
 								g.Store_Table_Prefix $ 'TGCFM_PageFields pf
 								LEFT OUTER JOIN ' $ g.Store_Table_Prefix $ 'TGCFM_PageValues pv ON ( pv.field_id = pf.id AND pv.page_id = ? )
@@ -22,16 +61,16 @@ Functions
 
 	<MvASSIGN NAME = "l.field_count" VALUE = 0>
 
-	<MvWHILE EXPR = "{ NOT TGCFM_PageValues.d.EOF }">
+	<MvWHILE EXPR = "{ NOT PageFields.d.EOF }">
 		<MvASSIGN NAME = "l.field_count" VALUE = "{ l.field_count + 1 }">
 
 		<MvEVAL EXPR = "{ PageField_Read( l.fields[ l.field_count ] ) }">
-		<MvASSIGN NAME = "l.fields" INDEX = "{ l.field_count }" MEMBER = "value" VALUE = "{ TGCFM_PageValues.d.value }">
+		<MvASSIGN NAME = "l.fields" INDEX = "{ l.field_count }" MEMBER = "value" VALUE = "{ PageFields.d.value }">
 
-		<MvSKIP NAME = "Merchant" VIEW = "TGCFM_PageValues" ROWS = 1>
+		<MvSKIP NAME = "Merchant" VIEW = "PageFields" ROWS = 1>
 	</MvWHILE>
 
-	<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_PageValues">
+	<MvCLOSEVIEW NAME = "Merchant" VIEW = "PageFields">
 	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_DB ].ListLoad_EOF_Return( 'TGCFM-ERROR-4002', l.field_count ) }">
 </MvFUNCTION>
 
@@ -40,10 +79,10 @@ Functions
 	<MvASSIGN NAME = "l.void" VALUE = "{ GroupFieldList_Load_Group( l.group_id, l.fields ) }">
 	<table border="0" cellpadding="2" cellspacing="0" width="100%">
 	<MvFOREACH ITERATOR = "l.custom_field" ARRAY = "l.fields" INDEX = "l.pos">
-		<MvIF EXPR = "{ miva_array_search( l.loaded_fields, 0, l.field, 'l.field:field_id EQ l.custom_field:id' ) }">
-			<MvASSIGN NAME = "l.custom_field" MEMBER = "value" VALUE = "{ l.field:value }">
+		<MvIF EXPR = "{ miva_array_search( l.loaded_fields, 0, l.field, 'l.field:id EQ l.custom_field:id' ) }">
+			<MvASSIGN NAME = "l.custom_field:value" VALUE = "{ l.field:value }">
 		</MvIF>
-		<MvASSIGN NAME = "l.input_name" VALUE = "{ 'TGCFM_Fields[' $ l.index $ ']:fields[' $ l.pos $ ']:value' }">
+		<MvASSIGN NAME = "l.input_name" VALUE = "{ 'TGCFM_Fields[' $ l.pos $ ']:value' }">
 
 		<MvCAPTURE VARIABLE = "l.prompt">
 			<MvIF EXPR = "{ NOT ISNULL l.custom_field:info }">
@@ -121,10 +160,9 @@ Functions
 			</td>
 		</tr>			
 		
-		<input type="hidden" name="{ 'TGCFM_Fields[' $ l.index $ ']:fields[' $ l.pos $ ']:id' }" 			value="{ encodeentities( l.custom_field:id ) }">
-		<input type="hidden" name="{ 'TGCFM_Fields[' $ l.index $ ']:fields[' $ l.pos $ ']:name' }" 		value="{ encodeentities( l.custom_field:name ) }">
-		<input type="hidden" name="{ 'TGCFM_Fields[' $ l.index $ ']:fields[' $ l.pos $ ']:fieldtype' }" 	value="{ encodeentities( l.custom_field:fieldtype ) }">
-		<input type="hidden" name="{ 'TGCFM_Fields[' $ l.index $ ']:fields[' $ l.pos $ ']:info' }" 		value="{ encodeentities( l.custom_field:info ) }">
+		<input type="hidden" name="{ 'TGCFM_Fields[' $ l.pos $ ']:id' }" 			value="{ encodeentities( l.custom_field:id ) }">
+		<input type="hidden" name="{ 'TGCFM_Fields[' $ l.pos $ ']:code' }" 		value="{ encodeentities( l.custom_field:code ) }">
+		<input type="hidden" name="{ 'TGCFM_Fields[' $ l.pos $ ']:fieldtype' }" 	value="{ encodeentities( l.custom_field:fieldtype ) }">
 	</MvFOREACH>
 	</table>
 </MvFUNCTION>
@@ -158,4 +196,32 @@ Functions
 	<td valign="top"><textarea name="{ encodeentities( l.name ) }" rows="{ encodeentities( l.rows ) }" wrap="off" onkeydown="TextArea_TabCapture_OnKeyDown( event ? event : window.event, this );" style="width:100%;"><MvEVAL EXPR = "{ encodeentities( l.value ) }"></textarea></td>
 	<td valign="top" align="right" style="width:34px;"><MvEVAL EXPR = "{ '<a href="JavaScript:PopupTextAreaColorSelector( \'' $ [ g.Module_Admin ].JavaScriptEncode( l.name ) $ '\', \'Insert\' );">' }"><img alt="Insert Color" border="0" src="{ g.AdminGraphics_Path $ 'color.gif' }" style="margin:0 8px;" /></a></td>
 	</tr></table>
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "Normalize_Value" PARAMETERS = "field var, value var" STANDARDOUTPUTLEVEL = "">
+	<MvIF EXPR = "{ l.field:fieldtype EQ 'checkbox' }">
+		<MvIF EXPR = "{ l.value }">	<MvASSIGN NAME = "l.value" VALUE = 1>
+		<MvELSE>					<MvASSIGN NAME = "l.value" VALUE = "">
+		</MvIF>
+	</MvIF>
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "PageFieldValue_Set" PARAMETERS = "field_id, page_id, value" STANDARDOUTPUTLEVEL = "" ERROROUTPUTLEVEL = "">
+	<MvQUERY NAME	= "Merchant"
+			 QUERY	= "{ 'INSERT INTO ' $ g.Store_Table_Prefix $ 'TGCFM_PageValues ( field_id, page_id, value ) VALUES ( ?, ?, ?)'}"
+			 FIELDS	= "l.field_id, l.page_id, l.value">
+	<MvIF EXPR = "{ g.MvQUERY_Error }">
+		<MvIF EXPR = "{ NOT [ g.Module_Library_Native_DBAPI ].DB_Error_IsIndexDuplicate( g.MvQUERY_Error ) }">
+			<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-4003', g.MvQUERY_Error ) }">
+		</MvIF>
+
+		<MvQUERY NAME	= "Merchant"
+				 QUERY	= "{ 'UPDATE ' $ g.Store_Table_Prefix $ 'TGCFM_PageValues SET value = ? WHERE field_id = ? AND page_id = ?' }"
+				 FIELDS	= "l.value, l.field_id, l.page_id">
+		<MvIF EXPR = "{ g.MvQUERY_Error }">
+			<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-4004', g.MvQUERY_Error ) }">
+		</MvIF>
+	</MvIF>
+
+	<MvFUNCTIONRETURN VALUE = 1>
 </MvFUNCTION>
