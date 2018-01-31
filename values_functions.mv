@@ -6,6 +6,7 @@ Functions
 <MvFUNCTION NAME = "PageField_Initialize" PARAMETERS = "page_id, all_settings var" STANDARDOUTPUTLEVEL = "">
 	<MvFOREACH ITERATOR = "l.field" ARRAY = "l.fields" COUNT = "{ PageFieldAndValueList_Load_All( l.page_id, l.fields ) }">
 		<MvASSIGN NAME = "l.all_settings:page:customfield_values:customfields" MEMBER = "{ l.field:code }" VALUE = "{ l.field:value }">
+		<MvASSIGN NAME = "l.all_settings:page:customfield_names:customfields" MEMBER = "{ l.field:code }" VALUE = "{ l.field:name }">
 	</MvFOREACH>
 </MvFUNCTION>
 
