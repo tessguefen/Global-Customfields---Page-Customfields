@@ -18,6 +18,8 @@ JSON Functions
 
 Other Functions
 	GroupList_Load_Include_Default( groups var )
+	GroupFieldList_Load_Group( group_id, fields var )
+
 </MvCOMMENT>
 
 <MvFUNCTION NAME = "Group_Read" PARAMETERS = "output var" STANDARDOUTPUTLEVEL = "">
@@ -262,7 +264,7 @@ Other Functions
 	
 	<MvASSIGN NAME = "l.groups" INDEX = 1 MEMBER = "id" 	VALUE = 0>
 	<MvASSIGN NAME = "l.groups" INDEX = 1 MEMBER = "code" 	VALUE = "default">
-	<MvASSIGN NAME = "l.groups" INDEX = 1 MEMBER = "name" 	VALUE = "<Default>">
+	<MvASSIGN NAME = "l.groups" INDEX = 1 MEMBER = "name" 	VALUE = "Default">
 	
 	<MvASSIGN NAME = "l.count" VALUE = 1>
 	
@@ -274,4 +276,52 @@ Other Functions
 
 	<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_Groups">
 	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_DB ].ListLoad_EOF_Return( 'TGCFM-ERROR-1009', l.count ) }">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "GroupList_Load_Order" PARAMETERS = "groups var" STANDARDOUTPUTLEVEL = "" ERROROUTPUTLEVEL = "">
+	<MvOPENVIEW NAME	= "Merchant"
+				VIEW 	= "TGCFM_Groups"
+				QUERY 	= "{ 'SELECT
+								DISTINCT pf.group_id, g.*
+							  FROM ' $
+								g.Store_Table_Prefix $ 'TGCFM_PageFields pf
+							  LEFT OUTER JOIN ' $
+								g.Store_Table_Prefix $ 'TGCFM_Groups g ON pf.group_id = g.id
+							  ORDER BY 
+								group_id' }">
+	<MvIF EXPR = "{ g.MvOPENVIEW_Error }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-1010', g.MvOPENVIEW_Error ) }">
+	</MvIF>
+	
+	<MvASSIGN NAME = "l.count" 	VALUE = 0>
+	
+	<MvWHILE EXPR = "{ NOT TGCFM_Groups.d.EOF }">
+		<MvEVAL EXPR = "{ Group_Read( l.groups[ ++l.count ] ) }">
+		
+		<MvSKIP NAME = "Merchant" VIEW = "TGCFM_Groups" ROWS = 1>
+	</MvWHILE>
+	
+	<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_Groups">
+	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_DB ].ListLoad_EOF_Return( 'TGCFM-ERROR-1011', l.count ) }">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "GroupFieldList_Load_Group" PARAMETERS = "group_id, fields var" STANDARDOUTPUTLEVEL = "" ERROROUTPUTLEVEL = "">
+	<MvOPENVIEW NAME	= "Merchant"
+				VIEW	= "PageFields"
+				QUERY	= "{ 'SELECT * FROM ' $ g.Store_Table_Prefix $ 'TGCFM_PageFields WHERE group_id = ? ORDER BY name' }"
+				FIELDS	= "l.group_id">
+	<MvIF EXPR = "{ g.MvOPENVIEW_Error }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-1012', g.MvOPENVIEW_Error ) }">
+	</MvIF>
+
+	<MvASSIGN NAME = "l.field_count" VALUE = 0>
+
+	<MvWHILE EXPR = "{ NOT PageFields.d.EOF }">
+		<MvEVAL EXPR = "{ PageField_Read( l.fields[ ++l.field_count ] ) }">
+
+		<MvSKIP NAME = "Merchant" VIEW = "PageFields" ROWS = 1>
+	</MvWHILE>
+
+	<MvCLOSEVIEW NAME = "Merchant" VIEW = "PageFields">
+	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_DB ].ListLoad_EOF_Return( 'TGCFM-ERROR-1013', l.field_count ) }">
 </MvFUNCTION>

@@ -146,8 +146,10 @@ PageFieldList_Column_Group.prototype.PageFieldGroupList_Load_Callback = function
 	this.groups_loaded															= true;
 
 	this.element_filter.options.length											= 0;
-	this.element_filter.options[ this.element_filter.options.length ]			= new Option( '<All>',						'' );
-	this.element_filter.options[ this.element_filter.options.length ]			= new Option( '<Default>',					0 );
+	this.element_filter.options[ this.element_filter.options.length ]			= new Option( 'All', '' );
+	this.element_filter.options[ this.element_filter.options.length ]			= new Option( 'Default', 0 );
+
+	console.log(this.element_filter);
 
 	if ( response.success )
 	{

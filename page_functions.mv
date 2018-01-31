@@ -23,6 +23,13 @@ Batchlist Functions/ HTML
 	Formatted_Group( group_id )
 	JSON_Formatted_Fieldtype( fieldtype )
 	Formatted_Fieldtype( fieldtype )
+
+Option Functions
+	PageFieldOptionList_Load( field_id, output var )
+	FieldOption_Insert( option var )
+	FieldOption_Delete_Field_ID( field_id )
+	FieldOption_Delete( field_id, value )
+	FieldOptions_Read( option var )
 </MvCOMMENT>
 
 <MvFUNCTION NAME = "PageField_Read" PARAMETERS = "output var" STANDARDOUTPUTLEVEL = "">
@@ -113,6 +120,17 @@ Batchlist Functions/ HTML
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-2001', g.MvQUERY_Error ) }">
 	</MvIF>
 
+	<MvIF EXPR = "{ l.pagefield:fieldtype EQ 'dropdown' OR l.pagefield:fieldtype EQ 'radio' }">
+		<MvASSIGN NAME = "l.option:field_id" VALUE = "{ l.pagefield:id }">
+		<MvFOREACH ITERATOR = "l.option_value" ARRAY = "l.pagefield:options">
+			<MvASSIGN NAME = "l.option:value" VALUE = "{ l.option_value }">
+
+			<MvIF EXPR = "{ NOT FieldOption_Insert( l.option ) }">
+				<MvFUNCTIONRETURN VALUE = 0>
+			</MvIF>
+		</MvFOREACH>
+	</MvIF>
+
 	<MvFUNCTIONRETURN VALUE = 1>
 </MvFUNCTION>
 
@@ -153,9 +171,24 @@ Batchlist Functions/ HTML
 							info = ?
 					      WHERE
 						    id			= ?' }"
-			 FIELDS	= "l.pagefield:id, l.pagefield:group_id, l.pagefield:code, l.pagefield:name, l.pagefield:fieldtype, l.pagefield:info, l.pagefield:id">
+			 FIELDS	= "l.pagefield:code, l.pagefield:group_id, l.pagefield:name, l.pagefield:fieldtype, l.pagefield:info, l.pagefield:id">
 	<MvIF EXPR = "{ g.MvQUERY_Error }">
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-2006', g.MvQUERY_Error ) }">
+	</MvIF>
+
+	<MvIF EXPR = "{ NOT FieldOption_Delete_Field_ID( l.pagefield:id ) }">
+		<MvFUNCTIONRETURN VALUE = 0>
+	</MvIF>
+
+	<MvIF EXPR = "{ l.pagefield:fieldtype EQ 'dropdown' OR l.pagefield:fieldtype EQ 'radio' }">
+		<MvASSIGN NAME = "l.option:field_id" VALUE = "{ l.pagefield:id }">
+		<MvFOREACH ITERATOR = "l.option_value" ARRAY = "l.pagefield:options">
+			<MvASSIGN NAME = "l.option:value" VALUE = "{ l.option_value }">
+
+			<MvIF EXPR = "{ NOT FieldOption_Insert( l.option ) }">
+				<MvFUNCTIONRETURN VALUE = 0>
+			</MvIF>
+		</MvFOREACH>
 	</MvIF>
 
 	<MvFUNCTIONRETURN VALUE = 1>
@@ -167,6 +200,10 @@ Batchlist Functions/ HTML
 			 FIELDS	= "l.id">
 	<MvIF EXPR = "{ g.MvQUERY_Error }">
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-2007', g.MvQUERY_Error ) }">
+	</MvIF>
+
+	<MvIF EXPR = "{ NOT FieldOption_Delete_Field_ID( l.id ) }">
+		<MvFUNCTIONRETURN VALUE = 0>
 	</MvIF>
 
 	<MvFUNCTIONRETURN VALUE = 1>
@@ -216,7 +253,7 @@ Batchlist Functions/ HTML
 					[
 						<MvASSIGN NAME = "l.add_count" VALUE = 0>
 						
-						<MvFOREACH ITERATOR = "l.option" ARRAY = "l.options">
+						<MvFOREACH ITERATOR = "l.option" ARRAY = "l.options" COUNT="{ PageFieldOptionList_Load( TGCFM_PageFields.d.id, l.options ) }">
 							<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_ArrayElement_Start( l.add_count ) }">
 							"id":		<MvEVAL EXPR = "{ l.option:id }">,
 							"field_id":	<MvEVAL EXPR = "{ l.option:field_id }">,
@@ -242,9 +279,9 @@ Batchlist Functions/ HTML
 	<MvASSIGN NAME = "l.pagefield" MEMBER = "code" VALUE = "{ g.Code }">
 	<MvASSIGN NAME = "l.pagefield" MEMBER = "group_id" VALUE = "{ int( g.Group_ID ) }">
 	<MvASSIGN NAME = "l.pagefield" MEMBER = "name" VALUE = "{ g.Name }">
-	<MvASSIGN NAME = "l.pagefield" MEMBER = "options" VALUE = "{ g.Option_Values }">
 	<MvASSIGN NAME = "l.pagefield" MEMBER = "info" VALUE = "{ g.Info }">
 	<MvASSIGN NAME = "l.pagefield" MEMBER = "fieldtype" VALUE = "{ g.Field_Type }">
+	<MvASSIGN NAME = "l.option_values_count" VALUE = "{ [ g.Module_JSON ].JSON_Array_String( g.Option_Values, l.pagefield:options ) }">
 
 	<MvIF EXPR = "{ NOT PageField_Insert( l.pagefield ) }">
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_FieldError( g.Error_Code, g.Error_Message ) }">
@@ -254,11 +291,15 @@ Batchlist Functions/ HTML
 </MvFUNCTION>
 
 <MvFUNCTION NAME = "JSON_PageField_Update" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "">
-	<MvASSIGN NAME = "l.global_cfm" MEMBER = "id" VALUE = "{ g.ID }">
-	<MvASSIGN NAME = "l.global_cfm" MEMBER = "code" VALUE = "{ g.Code }">
-	<MvASSIGN NAME = "l.global_cfm" MEMBER = "name" VALUE = "{ g.Name }">
+	<MvASSIGN NAME = "l.pagefield" MEMBER = "id" VALUE = "{ g.Field_ID }">
+	<MvASSIGN NAME = "l.pagefield" MEMBER = "code" VALUE = "{ g.Code }">
+	<MvASSIGN NAME = "l.pagefield" MEMBER = "group_id" VALUE = "{ int( g.Group_ID ) }">
+	<MvASSIGN NAME = "l.pagefield" MEMBER = "name" VALUE = "{ g.Name }">
+	<MvASSIGN NAME = "l.pagefield" MEMBER = "info" VALUE = "{ g.Info }">
+	<MvASSIGN NAME = "l.pagefield" MEMBER = "fieldtype" VALUE = "{ g.Field_Type }">
+	<MvASSIGN NAME = "l.option_values_count" VALUE = "{ [ g.Module_JSON ].JSON_Array_String( g.Option_Values, l.pagefield:options ) }">
 
-	<MvIF EXPR = "{ NOT PageField_Update( l.global_cfm ) }">
+	<MvIF EXPR = "{ NOT PageField_Update( l.pagefield ) }">
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_FieldError( g.Error_Code, g.Error_Message ) }">
 	</MvIF>
 
@@ -266,7 +307,7 @@ Batchlist Functions/ HTML
 </MvFUNCTION>
 
 <MvFUNCTION NAME = "JSON_PageField_Delete" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "">
-	<MvIF EXPR = "{ NOT PageField_Delete( g.ID ) }">
+	<MvIF EXPR = "{ NOT PageField_Delete( g.Field_ID ) }">
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_FieldError( 'code', g.Error_Message ) }">
 	</MvIF>
 	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_Success() }">
@@ -416,4 +457,76 @@ Batchlist Functions/ HTML
 	<MvELSEIF EXPR = "{ l.fieldtype EQ 'imageupload' }">	<MvFUNCTIONRETURN VALUE = "Image Upload">	
 	<MvELSE>												<MvFUNCTIONRETURN VALUE = "Unknown">	
 	</MvIF>
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "PageFieldOptionList_Load" PARAMETERS = "field_id, output var" STANDARDOUTPUTLEVEL = "" ERROROUTPUTLEVEL = "">
+	<MvOPENVIEW NAME	= "Merchant"
+				VIEW 	= "TGCFM_FieldOptions"
+				QUERY 	= "{ 'SELECT
+								*
+							  FROM ' $
+								g.Store_Table_Prefix $ 'TGCFM_FieldOptions
+							  WHERE
+								field_id = ?
+							  ORDER BY
+								value' }"
+				FIELDS	= "l.field_id">
+	<MvIF EXPR = "{ g.MvOPENVIEW_Error }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-3001', g.MvOPENVIEW_Error ) }">
+	</MvIF>
+	
+	<MvASSIGN NAME = "l.count" VALUE = 0>
+	
+	<MvWHILE EXPR = "{ NOT TGCFM_FieldOptions.d.EOF }">
+		<MvEVAL EXPR = "{ FieldOptions_Read( l.output[ ++l.count ] ) }">
+		
+		<MvSKIP NAME = "Merchant" VIEW = "TGCFM_FieldOptions" ROWS = 1>
+	</MvWHILE>
+	
+	<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_FieldOptions">
+	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_DB ].ListLoad_EOF_Return( 'TGCFM-ERROR-3002', l.count ) }">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "FieldOption_Insert" PARAMETERS = "option var" STANDARDOUTPUTLEVEL = "" ERROROUTPUTLEVEL = "">
+	<MvASSIGN NAME = "l.option:id"	VALUE = "{ [ g.Module_Library_DB ].StoreKey_Generate( 'TGCFM_FieldOptions' ) }">
+	
+	<MvQUERY NAME 	= "Merchant"
+			 QUERY 	= "{ 'INSERT INTO ' $ g.Store_Table_Prefix $ 'TGCFM_FieldOptions
+						  ( id, field_id, value )
+						  VALUES
+						  ( ?, ?, ? )' }"
+			 FIELDS = "l.option:id, l.option:field_id, l.option:value">
+	<MvIF EXPR = "{ g.MvQUERY_Error }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-3003', g.MvQUERY_Error ) }">
+	</MvIF>
+	
+	<MvFUNCTIONRETURN VALUE = 1>
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "FieldOption_Delete_Field_ID" PARAMETERS = "field_id" STANDARDOUTPUTLEVEL = "" ERROROUTPUTLEVEL = "">
+	<MvQUERY NAME 	= "Merchant"
+			 QUERY 	= "{ 'DELETE FROM ' $ g.Store_Table_Prefix $ 'TGCFM_FieldOptions WHERE field_id = ?' }"
+			 FIELDS = "l.field_id">
+	<MvIF EXPR = "{ g.MvQUERY_Error }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-3004', g.MvQUERY_Error ) }">
+	</MvIF>
+	
+	<MvFUNCTIONRETURN VALUE = 1>
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "FieldOption_Delete" PARAMETERS = "field_id, value" STANDARDOUTPUTLEVEL = "" ERROROUTPUTLEVEL = "">
+	<MvQUERY NAME 	= "Merchant"
+			 QUERY 	= "{ 'DELETE FROM ' $ g.Store_Table_Prefix $ 'TGCFM_FieldOptions WHERE field_id = ? AND value = ?' }"
+			 FIELDS = "l.field_id, l.value">
+	<MvIF EXPR = "{ g.MvQUERY_Error }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-3005', g.MvQUERY_Error ) }">
+	</MvIF>
+	
+	<MvFUNCTIONRETURN VALUE = 1>
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "FieldOptions_Read" PARAMETERS = "option var" STANDARDOUTPUTLEVEL = "">
+	<MvASSIGN NAME = "l.option:id" 			VALUE = "{ TGCFM_FieldOptions.d.id }">
+	<MvASSIGN NAME = "l.option:field_id" 	VALUE = "{ TGCFM_FieldOptions.d.field_id }">
+	<MvASSIGN NAME = "l.option:value" 		VALUE = "{ TGCFM_FieldOptions.d.value }">
 </MvFUNCTION>

@@ -1,0 +1,161 @@
+<MvCOMMENT>
+Functions
+	PageFieldAndValueList_Load_Group( page_id, group_id, fields var )
+</MvCOMMENT>
+
+<MvFUNCTION NAME = "PageFieldAndValueList_Load_Group" PARAMETERS = "page_id, group_id, fields var" STANDARDOUTPUTLEVEL = "" ERROROUTPUTLEVEL = "">
+	<MvOPENVIEW NAME	= "Merchant"
+				VIEW	= "TGCFM_PageValues"
+				QUERY	= "{ 'SELECT
+								pf.*, pv.value, pv.value_long
+							  FROM ' $
+								g.Store_Table_Prefix $ 'TGCFM_PageFields pf
+								LEFT OUTER JOIN ' $ g.Store_Table_Prefix $ 'TGCFM_PageValues pv ON ( pv.field_id = pf.id AND pv.page_id = ? )
+							  WHERE
+								group_id = ?
+							  ORDER BY
+								pf.name' }"
+				FIELDS	= "l.page_id, l.group_id">
+	<MvIF EXPR = "{ g.MvOPENVIEW_Error }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-4001', g.MvOPENVIEW_Error ) }">
+	</MvIF>
+
+	<MvASSIGN NAME = "l.field_count" VALUE = 0>
+
+	<MvWHILE EXPR = "{ NOT TGCFM_PageValues.d.EOF }">
+		<MvASSIGN NAME = "l.field_count" VALUE = "{ l.field_count + 1 }">
+
+		<MvEVAL EXPR = "{ PageField_Read( l.fields[ l.field_count ] ) }">
+		<MvASSIGN NAME = "l.fields" INDEX = "{ l.field_count }" MEMBER = "value" VALUE = "{ TGCFM_PageValues.d.value }">
+
+		<MvSKIP NAME = "Merchant" VIEW = "TGCFM_PageValues" ROWS = 1>
+	</MvWHILE>
+
+	<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_PageValues">
+	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_DB ].ListLoad_EOF_Return( 'TGCFM-ERROR-4002', l.field_count ) }">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "PageCustom_Field_Content" PARAMETERS = "page_id, group_id, can_upload, can_use_wysiwyg" STANDARDOUTPUTLEVEL = "text, html, compresswhitespace">
+	<MvASSIGN NAME = "l.void" VALUE = "{ PageFieldAndValueList_Load_Group( l.page_id, l.group_id, l.loaded_fields ) }">
+	<MvASSIGN NAME = "l.void" VALUE = "{ GroupFieldList_Load_Group( l.group_id, l.fields ) }">
+	<table border="0" cellpadding="2" cellspacing="0" width="100%">
+	<MvFOREACH ITERATOR = "l.custom_field" ARRAY = "l.fields" INDEX = "l.pos">
+		<MvIF EXPR = "{ miva_array_search( l.loaded_fields, 0, l.field, 'l.field:field_id EQ l.custom_field:id' ) }">
+			<MvASSIGN NAME = "l.custom_field" MEMBER = "value" VALUE = "{ l.field:value }">
+		</MvIF>
+		<MvASSIGN NAME = "l.input_name" VALUE = "{ 'TGCFM_Fields[' $ l.index $ ']:fields[' $ l.pos $ ']:value' }">
+
+		<MvCAPTURE VARIABLE = "l.prompt">
+			<MvIF EXPR = "{ NOT ISNULL l.custom_field:info }">
+				<span title="{ encodeentities( l.custom_field:info ) }" style="border-bottom: 1px dashed #000; cursor: help;"><MvEVAL EXPR = "{ encodeentities( l.custom_field:name ) }"></span>
+			<MvELSE>
+				<MvEVAL EXPR = "{ encodeentities( l.custom_field:name ) }">
+			</MvIF>
+		</MvCAPTURE>
+		
+		<MvIF EXPR = "{ ( l.custom_field:fieldtype EQ 'radio' ) OR ( l.custom_field:fieldtype EQ 'textarea' ) }"> 	<MvASSIGN NAME = "l.align" VALUE = "top">
+		<MvELSE>																									<MvASSIGN NAME = "l.align" VALUE = "middle">
+		</MvIF>
+		
+		<tr>
+			<td valign="{ l.align }" nowrap>
+			<MvIF EXPR = "{ l.custom_field:fieldtype NE 'checkbox' }">
+				<MvEVAL EXPR = "{ trim( l.prompt ) }">:
+			</MvIF>
+			</td>
+
+			<td width="100%" valign="{ l.align }">
+				<MvIF EXPR = "{ l.custom_field:fieldtype EQ 'textfield' }">
+					<input type="text" size="40" name="{ l.input_name }" value="{ encodeentities( l.custom_field:value ) }">
+				<MvELSEIF EXPR = "{ l.custom_field:fieldtype EQ 'textarea' }">
+					<MvIF EXPR = "{ l.can_use_wysiwyg }">	<MvEVAL EXPR = "{ [ g.Module_Library_Utilities ].DrawMMTextEditor( l.input_name, l.custom_field:value, 15, 1, 1, 0 ) }">
+					<MvELSE>								<MvEVAL EXPR = "{ DrawTemplateTextArea_No_WYSIWYG( l.input_name, l.custom_field:value, 8, 1 ) }">
+					</MvIF>
+				<MvELSEIF EXPR = "{ l.custom_field:fieldtype EQ 'imageupload' }">
+					<input type="text" size="40" name="{ l.input_name }" value="{ encodeentities( l.custom_field:value ) }">
+
+					<MvIF EXPR = "{ l.can_upload }">
+						<a href="{ 'JavaScript:PopupFileUpload( \'Image\', \'\', \'' $ l.input_name $ '\' );' }"><MvEVAL EXPR = "{ [ g.Module_Admin ].DrawImgButton_Upload( 0 ) }"></a>
+					</MvIF>
+				<MvELSEIF EXPR = "{ l.custom_field:fieldtype EQ 'radio' }">
+					<MvASSIGN NAME = "l.found" VALUE = 0>
+
+					<MvFOREACH ITERATOR = "l.option" ARRAY = "l.options" COUNT = "{ PageFieldOptionList_Load( l.custom_field:id, l.options ) }">
+						<MvIF EXPR = "{ l.custom_field:value EQ l.option:value }">
+							<MvASSIGN NAME = "l.found" VALUE = 1>
+						</MvIF>
+
+						<MvEVAL EXPR = "{ [ g.Module_Library_Utilities ].DrawRadio( l.input_name, l.option:value, l.custom_field:value, encodeentities( l.option:value ) ) }"><br />
+					</MvFOREACH>
+
+					<MvIF EXPR = "{ NOT l.found AND
+									NOT ISNULL l.custom_field:value }">
+						<MvEVAL EXPR = "{ [ g.Module_Library_Utilities ].DrawRadio( l.input_name, l.custom_field:value, l.custom_field:value, encodeentities( l.custom_field:value ) ) }"><br />
+					</MvIF>
+				<MvELSEIF EXPR = "{ l.custom_field:fieldtype EQ 'dropdown' }">
+					<MvASSIGN NAME = "l.found" VALUE = 0>
+
+					<select name="{ l.input_name }">
+						<MvEVAL EXPR = "{ [ g.Module_Library_Utilities ].DrawOption_SelectOne() }">
+						
+						<MvFOREACH ITERATOR = "l.option" ARRAY = "l.options" COUNT = "{ PageFieldOptionList_Load( l.custom_field:id, l.options ) }">
+							<MvIF EXPR = "{ l.custom_field:value EQ l.option:value }">
+								<MvASSIGN NAME = "l.found" VALUE = 1>
+							</MvIF>
+
+							<MvEVAL EXPR = "{ [ g.Module_Library_Utilities ].DrawOption( l.option:value, l.custom_field:value, encodeentities( l.option:value ) ) }">
+						</MvFOREACH>
+
+						<MvIF EXPR = "{ NOT l.found AND
+										NOT ISNULL l.custom_field:value }">
+							<MvEVAL EXPR = "{ [ g.Module_Library_Utilities ].DrawOption( l.custom_field:value, l.custom_field:value, encodeentities( l.custom_field:value ) ) }">
+						</MvIF>
+					</select>
+				<MvELSEIF EXPR = "{ l.custom_field:fieldtype EQ 'checkbox' }">
+					<MvIF EXPR = "{ NOT ISNULL l.custom_field:value }">	<MvASSIGN NAME = "l.checked" VALUE = 1>
+					<MvELSE>											<MvASSIGN NAME = "l.checked" VALUE = 0>
+					</MvIF>
+					
+					<MvEVAL EXPR = "{ [ g.Module_Library_Utilities ].DrawCheckbox( l.checked, l.input_name, 'yes', l.prompt ) }">
+				</MvIF>
+			</td>
+		</tr>			
+		
+		<input type="hidden" name="{ 'TGCFM_Fields[' $ l.index $ ']:fields[' $ l.pos $ ']:id' }" 			value="{ encodeentities( l.custom_field:id ) }">
+		<input type="hidden" name="{ 'TGCFM_Fields[' $ l.index $ ']:fields[' $ l.pos $ ']:name' }" 		value="{ encodeentities( l.custom_field:name ) }">
+		<input type="hidden" name="{ 'TGCFM_Fields[' $ l.index $ ']:fields[' $ l.pos $ ']:fieldtype' }" 	value="{ encodeentities( l.custom_field:fieldtype ) }">
+		<input type="hidden" name="{ 'TGCFM_Fields[' $ l.index $ ']:fields[' $ l.pos $ ']:info' }" 		value="{ encodeentities( l.custom_field:info ) }">
+	</MvFOREACH>
+	</table>
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "DrawTemplateTextArea_No_WYSIWYG" PARAMETERS = "name, value var, rows, cols" STANDARDOUTPUTLEVEL = "text, html, compresswhitespace">
+	<script type="text/javascript">
+	<!--
+		function PopupTextAreaColorSelector( field, inputText )
+		{
+			window.open( Adminurl + 'Screen=COLR&Form=' + encodeURIComponent( Screen ) + '&Field=' + encodeURIComponent( field ) + '&InputText=' + encodeURIComponent( inputText ), 'ColorSelector', 'toolbar=no,location=no,directories=no,status=no,scrollbars=yes,resizable=yes,copyhistory=no,width=340,height=402' ).focus();
+		}
+
+		function TextArea_Insert( name, newText )
+		{
+			var self = document.forms[ Screen ].elements[ name ];
+			var scroll_top;
+			var caret_pos;
+
+			self.focus();
+			scroll_top		= self.scrollTop;
+
+			caret_pos		= self.selectionStart + newText.length;
+			self.value		= self.value.substring( 0, self.selectionStart ) + newText + self.value.substring( self.selectionStart, self.value.length );
+			self.setSelectionRange( caret_pos, caret_pos );
+			self.scrollTop	= scroll_top;
+			
+		}
+	//-->
+	</script>
+	<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr>
+	<td valign="top"><textarea name="{ encodeentities( l.name ) }" rows="{ encodeentities( l.rows ) }" wrap="off" onkeydown="TextArea_TabCapture_OnKeyDown( event ? event : window.event, this );" style="width:100%;"><MvEVAL EXPR = "{ encodeentities( l.value ) }"></textarea></td>
+	<td valign="top" align="right" style="width:34px;"><MvEVAL EXPR = "{ '<a href="JavaScript:PopupTextAreaColorSelector( \'' $ [ g.Module_Admin ].JavaScriptEncode( l.name ) $ '\', \'Insert\' );">' }"><img alt="Insert Color" border="0" src="{ g.AdminGraphics_Path $ 'color.gif' }" style="margin:0 8px;" /></a></td>
+	</tr></table>
+</MvFUNCTION>

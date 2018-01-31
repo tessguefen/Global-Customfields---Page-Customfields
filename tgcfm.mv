@@ -345,6 +345,8 @@
 
 	<MvIF EXPR = "{ g.Module_Function EQ 'JSON_PageFields_Load_Query' }"><MvFUNCTIONRETURN VALUE = "{ JSON_PageFields_Load_Query( l.module ) }"></MvIF>
 	<MvIF EXPR = "{ g.Module_Function EQ 'PageField_Insert' }"><MvFUNCTIONRETURN VALUE = "{ JSON_PageField_Insert( l.module ) }"></MvIF>
+	<MvIF EXPR = "{ g.Module_Function EQ 'PageField_Update' }"><MvFUNCTIONRETURN VALUE = "{ JSON_PageField_Update( l.module ) }"></MvIF>
+	<MvIF EXPR = "{ g.Module_Function EQ 'PageField_Delete' }"><MvFUNCTIONRETURN VALUE = "{ JSON_PageField_Delete( l.module ) }"></MvIF>
 
 	<MvIF EXPR = "{ g.Module_Function EQ 'JSON_GroupList_Load_All' }"><MvFUNCTIONRETURN VALUE = "{ JSON_GroupList_Load_All( l.module ) }"></MvIF>
 </MvFUNCTION>
@@ -364,7 +366,29 @@
 </MvFUNCTION>
 
 <MvFUNCTION NAME = "ComponentModule_Tabs" PARAMETERS = "module var, item, settings var" STANDARDOUTPUTLEVEL = "">
-	<MvFUNCTIONRETURN VALUE = "TGCFM: All the things...." />
+	<MvIF EXPR = "{ NOT GroupList_Load_Order( l.groups ) }">
+		<MvIF EXPR = "{ NOT [ g.Module_Library_DB ].Error_Is_EOF() }">
+			<MvFUNCTIONRETURN VALUE = 0>
+		</MvIF>
+		
+		<MvFUNCTIONRETURN VALUE = "">
+	</MvIF>
+
+	<MvASSIGN NAME = "l.tabs" VALUE = "">
+
+	<MvFOREACH ITERATOR = "l.group" ARRAY = "l.groups" INDEX = "l.pos">
+		<MvIF EXPR = "{ l.pos GT 1 }">
+			<MvASSIGN NAME = "l.tabs" VALUE = "{ l.tabs $ ',' }">
+		</MvIF>
+		
+		<MvIF EXPR = "{ l.group:id EQ 0 }">
+			<MvASSIGN NAME = "l.tabs" VALUE = "{ l.tabs $ 'TGCFM_default:Custom Fields' }">
+		<MvELSE>
+			<MvASSIGN NAME = "l.tabs" VALUE = "{ l.tabs $ 'TGCFM_' $ l.group:code $ ':' $ l.group:name }">
+		</MvIF>
+	</MvFOREACH>
+	
+	<MvFUNCTIONRETURN VALUE = "{ l.tabs }">
 </MvFUNCTION>
 
 <MvFUNCTION NAME = "ComponentModule_Validate" PARAMETERS = "module var, item, field_prefix, fields var" STANDARDOUTPUTLEVEL = "">
@@ -375,7 +399,21 @@
 	<MvFUNCTIONRETURN VALUE = 1>
 </MvFUNCTION>
 
-<MvFUNCTION NAME = "ComponentModule_Content" PARAMETERS = "module var, item, tab, load_fields, field_prefix, fields var, settings var" STANDARDOUTPUTLEVEL = "">
+<MvFUNCTION NAME = "ComponentModule_Content" PARAMETERS = "module var, item, tab, load_fields, field_prefix, fields var, settings var" STANDARDOUTPUTLEVEL = "text,html,compresswhitespace">
+	
+	<MvIF EXPR = "{ NOT [ g.Module_Feature_TUI_DB ].Page_Load_Code( g.Edit_Page, l.current_page ) }">
+		<MvFUNCTIONRETURN VALUE = 1 />
+	</MvIF>
+	<MvASSIGN NAME = "l.group_count"	VALUE = "{ GroupList_Load_Include_Default( l.groups ) }">
+	<MvASSIGN NAME = "l.can_upload" VALUE = "{ [ g.Module_Admin ].CanI( 'PAGE', 0, 0, 1, 0 ) }">
+	
+	<MvFOREACH ITERATOR = "l.group" ARRAY = "l.groups" INDEX = "l.pos" COUNT = "{ l.group_count }">
+		<MvIF EXPR = "{ l.tab EQ 'TGCFM_' $ l.group:code }">
+			<MvEVAL EXPR = "{ PageCustom_Field_Content( l.current_page:id, l.group:id, l.can_upload, 0 ) }">
+		</MvIF>
+	</MvFOREACH>
+	
+	<MvFUNCTIONRETURN VALUE = 1>
 </MvFUNCTION>
 
 <MvFUNCTION NAME = "ComponentModule_Defaults" PARAMETERS = "module var, settings var" STANDARDOUTPUTLEVEL = "">
@@ -398,3 +436,4 @@
 <MvINCLUDE FILE = "global_functions.mv">
 <MvINCLUDE FILE = "group_functions.mv">
 <MvINCLUDE FILE = "page_functions.mv">
+<MvINCLUDE FILE = "values_functions.mv">
