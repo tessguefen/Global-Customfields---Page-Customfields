@@ -52,6 +52,7 @@ function TGCFM_GlobalBatchlist_Preload( id, checked, callback, delegator ) {
 function TGCFM_GlobalBatchlist() {
 	var self = this;
 	MMBatchList.call( self, 'jsTGCFM_GlobalBatchlist' );
+	self.Feature_Persistent_Filters_Enable( 'jsTGCFM_GlobalBatchlist' );
 	self.Feature_SearchBar_SetPlaceholderText( 'Search Customfields...' );
 	self.SetDefaultSort( 'id', '-' );
 	self.Feature_Add_Enable('Add Customfield');

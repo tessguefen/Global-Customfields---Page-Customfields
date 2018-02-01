@@ -55,6 +55,8 @@ function PageFieldList()
 {
 	MMBatchList.call( this, 'jsTGCFM_PageFieldsBatchlist' );
 
+	this.Feature_Persistent_Filters_Enable( 'jsTGCFM_PageFieldsBatchlist' );
+
 	this.Feature_Buttons_AddButton_Persistent( '', 'New Custom Field', 'add', this.Add );
 	this.Feature_EditDialog_Enable( 'Edit Custom Field' );
 	this.Feature_Delete_Enable( 'Delete Custom Field(s)' );

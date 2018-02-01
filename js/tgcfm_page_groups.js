@@ -43,6 +43,7 @@ function TGCFM_GroupsBatchlist_Update( id, fieldlist, callback, delegator ) {
 function TGCFM_GroupsBatchlist() {
 	var self = this;
 	MMBatchList.call( self, 'jsTGCFM_GroupsBatchlist' );
+	self.Feature_Persistent_Filters_Enable( 'jsTGCFM_GroupsBatchlist' );
 	self.Feature_SearchBar_SetPlaceholderText( 'Search Groups...' );
 	self.SetDefaultSort( 'id', '-' );
 	self.Feature_Add_Enable('Add Group');

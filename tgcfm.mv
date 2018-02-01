@@ -237,16 +237,25 @@
 	<MvIF EXPR = "{ l.tab EQ 'TGCFM_Global' }">
 		<MvEVAL EXPR = "{ [ g.Module_Admin ].Element_MMBatchList_HTML() }">
 		<div id="jsTGCFM_GlobalBatchlist"></div>
+		<span id="jsTGCFM_GlobalBatchlist_mmbatchlist_persistent_filters" class="mm9_batchlist_action_row_section">
+			<span style="font-size:1rem;">Global Customfields</span>
+		</span>
 		<MvFUNCTIONRETURN VALUE = 1 />
 	</MvIF>
 	<MvIF EXPR = "{ l.tab EQ 'TGCFM_Groups' }">
 		<MvEVAL EXPR = "{ [ g.Module_Admin ].Element_MMBatchList_HTML() }">
 		<div id="jsTGCFM_GroupsBatchlist"></div>
+		<span id="jsTGCFM_GroupsBatchlist_mmbatchlist_persistent_filters" class="mm9_batchlist_action_row_section">
+			<span style="font-size:1rem;">Page Customfield Groups</span>
+		</span>
 		<MvFUNCTIONRETURN VALUE = 1 />
 	</MvIF>
 	<MvIF EXPR = "{ l.tab EQ 'TGCFM_Pages' }">
 		<MvEVAL EXPR = "{ [ g.Module_Admin ].Element_MMBatchList_HTML() }">
 		<div id="jsTGCFM_PageFieldsBatchlist"></div>
+		<span id="jsTGCFM_PageFieldsBatchlist_mmbatchlist_persistent_filters" class="mm9_batchlist_action_row_section">
+			<span style="font-size:1rem;">Page Customfields</span>
+		</span>
 		<MvEVAL EXPR = "{ PageField_AddEditDialog_HTML( l.module ) }">
 		<MvFUNCTIONRETURN VALUE = 1 />
 	</MvIF>
