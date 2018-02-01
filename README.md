@@ -11,3 +11,12 @@ Page Customfields (on Load, with `tgcfm` item assigned)
 l.settings:page:customfield_values:customfields:[code]
 l.settings:page:customfield_names:customfields:[code]
 ```
+
+
+
+
+notes
+
+- add toggle for global to load by default or not
+- create item for global items `Load_Global_Fields`
+- create item for page items `Load_PageCode_Fields`/ `Load_PageID_Fields`
