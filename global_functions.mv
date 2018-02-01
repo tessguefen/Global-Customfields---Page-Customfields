@@ -20,6 +20,9 @@ JSON Functions
 	JSON_Global_Update( module var )
 	JSON_Global_Delete( module var )
 	JSON_Global_Preload( module var )
+
+Component Functions
+	Component_Load_Global_Fields( module var, param, all_settings var, custom_fields, output var)
 </MvCOMMENT>
 
 <MvFUNCTION NAME = "GlobalField_Read" PARAMETERS = "output var" STANDARDOUTPUTLEVEL = "">
@@ -329,4 +332,9 @@ JSON Functions
 	</MvIF>
 
 	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_Success() }">
+</MvFUNCTION>
+
+
+<MvFUNCTION NAME ="Component_Load_Global_Fields" PARAMETERS = "module var, param, all_settings var, custom_fields, output var" STANDARDOUTPUTLEVEL = "">
+	<MvFUNCTIONRETURN VALUE = "{ Load_Global_Fields( l.custom_fields, l.output ) }">
 </MvFUNCTION>

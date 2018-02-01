@@ -451,7 +451,65 @@
 <MvFUNCTION NAME = "ComponentModule_Prerender" PARAMETERS = "module var, item, all_settings var, settings var, param" STANDARDOUTPUTLEVEL = "">
 </MVFUNCTION>
 
-<MvFUNCTION NAME = "ComponentModule_Render_Start" PARAMETERS = "module var, item, settings var, item_settings var, param" STANDARDOUTPUTLEVEL = "html, text">
+<MvFUNCTION NAME = "ComponentModule_Render_Start" PARAMETERS = "module var, item, settings var, item_settings var, param" STANDARDOUTPUTLEVEL = "">
+	<MvIF EXPR = "{ NOT Parse_Function_Parameters( l.param, l.function_name, l.parameters, l.parameter_count ) }">
+		<MvFUNCTIONRETURN VALUE = 0>
+	</MvIF>
+
+	<MvCOMMENT>
+	|
+	|	Parameters & Function check
+	|
+	</MvCOMMENT>
+
+
+	<MvIF EXPR = "{ ( l.function_name EQ 'load_global_fields' )			OR
+					( l.function_name EQ 'load_pagecode_fields' )		OR
+					( l.function_name EQ 'load_pageid_fields' )
+				}">
+		<MvASSIGN NAME = "l.new_param" VALUE = "{ 'Component_' $ l.function_name $ '( l.module, l.param, l.settings, ' $ l.parameters $ ' )' }">
+	</MvIF>
+
+	<MvCOMMENT>
+	|
+	|	tagerror
+	|	22, 3 = display
+	|	22, 0 = no display
+	|
+	|	FOR DEBUGGING, leave as 22, 3
+	|
+	</MvCOMMENT>
+
+	<MvIF EXPR = "{ ISNULL l.new_param }">
+		<MvFUNCTIONRETURN VALUE = "" />
+	</MvIF>
+
+	<MvASSEMBLY>
+		.string asm_0 "l.new_param"
+		.string asm_1 "g.Module_Root"
+		.string asm_2 "l.module"
+		.string asm_3 "module"
+		.string asm_4 "g.MvDO_Error"
+
+			pushc		asm_1
+			pushn
+			pushc		asm_2
+			pushn
+			pushc		asm_3
+			memb_ro
+			cat
+			pushc		asm_0
+			pushn
+			tagerror	22, 0
+			do_function
+			pop
+			tagerror	22, 0
+			pushc		asm_4
+			pushn
+			jmp_eq		L_asm_success
+			retn
+		L_asm_success:
+	</MvASSEMBLY>
 </MvFUNCTION>
 
 <MvFUNCTION NAME = "SystemModule_Screen" PARAMETERS = "module var, screen" STANDARDOUTPUTLEVEL = "">
@@ -472,3 +530,4 @@
 <MvINCLUDE FILE = "group_functions.mv">
 <MvINCLUDE FILE = "page_functions.mv">
 <MvINCLUDE FILE = "values_functions.mv">
+<MvINCLUDE FILE = "helpers.mv">

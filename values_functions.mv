@@ -1,6 +1,20 @@
 <MvCOMMENT>
+
 Functions
+	PageField_Initialize( page_id, all_settings var )
 	PageFieldAndValueList_Load_Group( page_id, group_id, fields var )
+	PageCustom_Field_Content( page_id, group_id, can_upload, can_use_wysiwyg )
+	DrawTemplateTextArea_No_WYSIWYG( name, value var, rows, cols )
+	Normalize_Value( field var, value var )
+	PageFieldValue_Set( field_id, page_id, value )
+
+	Load_PageCode_Fields( page_code, custom_fields, output var )
+	Load_PageID_Fields( page_id, custom_fields, output var )
+	Load_PageField_Value_ID( page_id, field_id, output var )
+	Load_PageField_Value_Code( page_id, field_code, output var )
+	Component_Load_PageCode_Fields( module var, param, all_settings var, page_code, custom_fields, output var )
+	Component_Load_PageID_Fields( module var, param, all_settings var, page_id, custom_fields, output var )
+
 </MvCOMMENT>
 
 <MvFUNCTION NAME = "PageField_Initialize" PARAMETERS = "page_id, all_settings var" STANDARDOUTPUTLEVEL = "">
@@ -225,4 +239,76 @@ Functions
 	</MvIF>
 
 	<MvFUNCTIONRETURN VALUE = 1>
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "Load_PageCode_Fields" PARAMETERS = "page_code, custom_fields, output var" STANDARDOUTPUTLEVEL = "">
+	<MvIF EXPR = "{ NOT [ g.Module_Feature_TUI_DB ].Page_Load_Code( l.page_code, l.current_page ) }">
+		<MvFUNCTIONRETURN VALUE = 0>
+	</MvIF>
+	<MvFUNCTIONRETURN VALUE = "{ Load_PageID_Fields( l.current_page:id, l.custom_fields, l.output ) }">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "Load_PageID_Fields" PARAMETERS = "page_id, custom_fields, output var" STANDARDOUTPUTLEVEL = "">
+	<MvIF EXPR = "{ ISNULL l.custom_fields }">
+		<MvFOREACH ITERATOR = "l.field" ARRAY = "l.fields" INDEX = "l.pos" COUNT = "{ PageFieldAndValueList_Load_All( l.page_id, l.fields ) }">
+			<MvASSIGN NAME = "l.output" INDEX = "{ l.pos }" MEMBER = "code"		VALUE = "{ l.field:code }">
+			<MvASSIGN NAME = "l.output" INDEX = "{ l.pos }" MEMBER = "name"		VALUE = "{ l.field:name }">
+			<MvASSIGN NAME = "l.output" INDEX = "{ l.pos }" MEMBER = "value"	VALUE = "{ l.field:value }">
+		</MvFOREACH>
+	<MvELSE>
+		<MvASSIGN NAME = "l.total_custom_fields" VALUE = "{ miva_splitstring( l.custom_fields, ',', l.custom_field_codes, l.flags ) }">
+
+		<MvIF EXPR = "{ l.total_custom_fields EQ 1 }">
+			<MvIF EXPR = "{ NOT Load_PageField_Value_Code( l.page_id, l.custom_fields, l.current_field ) }">
+				<MvFUNCTIONRETURN VALUE = 0>
+			</MvIF>
+			<MvASSIGN NAME = "l.output" VALUE = "{ l.current_field:value }">
+			<MvFUNCTIONRETURN VALUE = 1>
+		<MvELSE>
+			<MvFOREACH ITERATOR = "l.custom_field_code" ARRAY = "l.custom_field_codes">
+				<MvIF EXPR = "{ Load_PageField_Value_Code( l.page_id, l.custom_field_code, l.current_field ) }">
+					<MvASSIGN NAME = "l.output" MEMBER = "{ l.custom_field_code }" VALUE = "{ l.current_field:value }">
+				</MvIF>
+			</MvFOREACH>
+		</MvIF>
+	</MvIF>
+	<MvFUNCTIONRETURN VALUE = 1>
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "Load_PageField_Value_ID" PARAMETERS = "page_id, field_id, output var" STANDARDOUTPUTLEVEL = "">
+	<MvOPENVIEW NAME	= "Merchant"
+				VIEW	= "PageFields"
+				QUERY	= "{ 'SELECT * FROM ' $ g.Store_Table_Prefix $ 'TGCFM_PageFields WHERE page_id = ? AND field_id = ?' }"
+				FIELDS	= "l.page_id, l.field_id">
+	<MvIF EXPR = "{ g.MvOPENVIEW_Error }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-4005', g.MvOPENVIEW_Error ) }">
+	</MvIF>
+
+	<MvASSIGN NAME = "l.field_count" VALUE = 0>
+
+	<MvWHILE EXPR = "{ NOT PageFields.d.EOF }">
+		<MvASSIGN NAME = "l.field_count" VALUE = "{ l.field_count + 1 }">
+
+		<MvEVAL EXPR = "{ PageField_Read( l.output ) }">
+
+		<MvSKIP NAME = "Merchant" VIEW = "PageFields" ROWS = 1>
+	</MvWHILE>
+
+	<MvCLOSEVIEW NAME = "Merchant" VIEW = "PageFields">
+	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_DB ].ListLoad_EOF_Return( 'TGCFM-ERROR-4006', l.field_count ) }">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "Load_PageField_Value_Code" PARAMETERS = "page_id, field_code, output var" STANDARDOUTPUTLEVEL = "">
+	<MvIF EXPR = "{ NOT Load_PageField_Code( l.field_code, l.field ) }">
+		<MvFUNCTIONRETURN VALUE = 0>
+	</MvIF>
+	<MvFUNCTIONRETURN VALUE = "{ Load_PageField_Value_ID( l.page_id, l.field:id, l.output ) }">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "Component_Load_PageCode_Fields" PARAMETERS = "module var, param, all_settings var, page_code, custom_fields, output var" STANDARDOUTPUTLEVEL = "">
+	<MvFUNCTIONRETURN VALUE = "{ Load_PageCode_Fields( l.page_code, l.custom_fields, l.output ) }">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "Component_Load_PageID_Fields" PARAMETERS = "module var, param, all_settings var, page_id, custom_fields, output var" STANDARDOUTPUTLEVEL = "">
+	<MvFUNCTIONRETURN VALUE = "{ Load_PageID_Fields( l.page_id, l.custom_fields, l.output ) }">
 </MvFUNCTION>
