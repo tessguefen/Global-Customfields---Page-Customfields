@@ -10,9 +10,9 @@ Items
 <mvt:item name="tgcfm" param="Load_PageCode_Fields( 'SFNT', 'code_1, code_2', l.settings:sfnt_customfields )" />
 <mvt:item name="tgcfm" param="Load_PageCode_Fields( 'SFNT', '', l.settings:sfnt_customfields )" />
 
-<mvt:item name="tgcfm" param="Load_PageCode_Fields( l.settings:somepage:id, 'code_1', l.settings:sfnt_customfields )" />
-<mvt:item name="tgcfm" param="Load_PageCode_Fields( l.settings:somepage:id, 'code_1, code_2', l.settings:sfnt_customfields )" />
-<mvt:item name="tgcfm" param="Load_PageCode_Fields( l.settings:somepage:id, '', l.settings:sfnt_customfields )" />
+<mvt:item name="tgcfm" param="Load_PageID_Fields( l.settings:somepage:id, 'code_1', l.settings:sfnt_customfields )" />
+<mvt:item name="tgcfm" param="Load_PageID_Fields( l.settings:somepage:id, 'code_1, code_2', l.settings:sfnt_customfields )" />
+<mvt:item name="tgcfm" param="Load_PageID_Fields( l.settings:somepage:id, '', l.settings:sfnt_customfields )" />
 ```
 
 Global Customfields (on Load, Fields that are set to "Preload" will populate)
