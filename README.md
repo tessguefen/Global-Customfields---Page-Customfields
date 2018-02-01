@@ -33,3 +33,5 @@ l.settings:page:customfield_names:customfields:[code]
 ![Page Customfield Groups Batchlist](https://puu.sh/ze87t/db3d772a29.png)
 
 ![Global Customfields Batchlist](http://puu.sh/ze8aB/1e35a7567f.png)
+
+![Page Edit Screen](https://puu.sh/ze8c0/999c43e18a.png)
