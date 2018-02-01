@@ -1,9 +1,24 @@
 # Global Customfields & Page Customfields
 
+Items
+```xml
+<mvt:item name="tgcfm" param="Load_Global_Fields( 'code_1', l.settings:my_field )" />
+<mvt:item name="tgcfm" param="Load_Global_Fields( 'code_1, code_2', l.settings:my_fields )" />
+<mvt:item name="tgcfm" param="Load_Global_Fields( '', l.settings:all_global_fields )" />
+
+<mvt:item name="tgcfm" param="Load_PageCode_Fields( 'SFNT', 'code_1', l.settings:sfnt_customfields )" />
+<mvt:item name="tgcfm" param="Load_PageCode_Fields( 'SFNT', 'code_1, code_2', l.settings:sfnt_customfields )" />
+<mvt:item name="tgcfm" param="Load_PageCode_Fields( 'SFNT', '', l.settings:sfnt_customfields )" />
+
+<mvt:item name="tgcfm" param="Load_PageCode_Fields( l.settings:somepage:id, 'code_1', l.settings:sfnt_customfields )" />
+<mvt:item name="tgcfm" param="Load_PageCode_Fields( l.settings:somepage:id, 'code_1, code_2', l.settings:sfnt_customfields )" />
+<mvt:item name="tgcfm" param="Load_PageCode_Fields( l.settings:somepage:id, '', l.settings:sfnt_customfields )" />
 ```
-<mvt:do file="g.Module_Root $ '/modules/util/tgcfm.mvc'" name="l.void" value="Load_Global_Fields( 'gfm_1', l.settings:my_field)" />
-<mvt:do file="g.Module_Root $ '/modules/util/tgcfm.mvc'" name="l.void" value="Load_Global_Fields( 'gfm_1,some_code', l.settings:my_fields)" />
-<mvt:do file="g.Module_Root $ '/modules/util/tgcfm.mvc'" name="l.void" value="Load_Global_Fields( '', l.settings:all_global_fields)" />
+
+Global Customfields (on Load, Fields that are set to "Preload" will populate)
+```
+g.Global_Custom_Fields:customfield_values:customfields:[code]
+g.Global_Custom_Fields:customfield_names:customfields:[code]
 ```
 
 Page Customfields (on Load, with `tgcfm` item assigned)
@@ -11,12 +26,3 @@ Page Customfields (on Load, with `tgcfm` item assigned)
 l.settings:page:customfield_values:customfields:[code]
 l.settings:page:customfield_names:customfields:[code]
 ```
-
-
-
-
-notes
-
-- add toggle for global to load by default or not
-- create item for global items `Load_Global_Fields`
-- create item for page items `Load_PageCode_Fields`/ `Load_PageID_Fields`
