@@ -26,3 +26,10 @@ Page Customfields (on Load, with `tgcfm` item assigned)
 l.settings:page:customfield_values:customfields:[code]
 l.settings:page:customfield_names:customfields:[code]
 ```
+
+# Screenshots
+![Page Customfields Batchlist](https://puu.sh/ze892/96203114b6.png)
+
+![Page Customfield Groups Batchlist](https://puu.sh/ze87t/db3d772a29.png)
+
+![Global Customfields Batchlist](http://puu.sh/ze8aB/1e35a7567f.png)
