@@ -12,12 +12,14 @@ Functions
 Future Item/ MvDO Functions
 	GlobalFieldList_Load_All( fields var )
 	Load_Global_Fields( custom_fields, output var)
+	Load_Global_Fields_Runtime()
 
 JSON Functions
 	JSON_Global_CFS_Load_Query( module var )
 	JSON_Global_Insert( module var )
 	JSON_Global_Update( module var )
 	JSON_Global_Delete( module var )
+	JSON_Global_Preload( module var )
 </MvCOMMENT>
 
 <MvFUNCTION NAME = "GlobalField_Read" PARAMETERS = "output var" STANDARDOUTPUTLEVEL = "">
@@ -25,6 +27,7 @@ JSON Functions
 	<MvASSIGN NAME = "l.output:code"	VALUE = "{ TGCFM_GlobalFields.d.code }">
 	<MvASSIGN NAME = "l.output:name"	VALUE = "{ TGCFM_GlobalFields.d.name }">
 	<MvASSIGN NAME = "l.output:value"	VALUE = "{ TGCFM_GlobalFields.d.value }">
+	<MvASSIGN NAME = "l.output:preload"	VALUE = "{ TGCFM_GlobalFields.d.preload }">
 </MvFUNCTION>
 
 <MvFUNCTION NAME = "Load_Global_CFM_ID" PARAMETERS = "id, output var" STANDARDOUTPUTLEVEL = "">
@@ -71,6 +74,7 @@ JSON Functions
 	<MvASSIGN NAME = "l.global_cfm" MEMBER = "code" VALUE = "{ trim( l.global_cfm:code ) }">
 	<MvASSIGN NAME = "l.global_cfm" MEMBER = "name" VALUE = "{ trim( l.global_cfm:name ) }">
 	<MvASSIGN NAME = "l.global_cfm" MEMBER = "value" VALUE = "{ trim( l.global_cfm:value ) }">
+	<MvASSIGN NAME = "l.global_cfm" MEMBER = "preload" VALUE = "{ trim( l.global_cfm:preload ) }">
 
 	<MvIF EXPR = "{ ISNULL l.global_cfm:code }">
 		<MvASSIGN NAME = "g.Error_Code" VALUE = "code">
@@ -95,10 +99,10 @@ JSON Functions
 	<MvASSIGN NAME = "l.global_cfm" MEMBER = "id" VALUE = "{ [ g.Module_Library_DB ].StoreKey_Generate( 'TGCFM_Fields' ) }">
 	<MvQUERY NAME	= "Merchant"
 			 QUERY	= "{ 'INSERT INTO ' $ g.Store_Table_Prefix $ 'TGCFM_GlobalFields
-					      ( id, code, name, value )
+					      ( id, code, name, value, preload )
 						  VALUES
-						  ( ?, ?, ?, ? )' }"
-			 FIELDS	= "l.global_cfm:id, l.global_cfm:code, l.global_cfm:name, l.global_cfm:value">
+						  ( ?, ?, ?, ?, ? )' }"
+			 FIELDS	= "l.global_cfm:id, l.global_cfm:code, l.global_cfm:name, l.global_cfm:value, l.global_cfm:preload">
 	<MvIF EXPR = "{ g.MvQUERY_Error }">
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-0001', g.MvQUERY_Error ) }">
 	</MvIF>
@@ -138,10 +142,11 @@ JSON Functions
 					      SET
 							code = ?,
 							name = ?,
-							value = ?
+							value = ?,
+							preload = ?
 					      WHERE
 						    id			= ?' }"
-			 FIELDS	= "l.global_cfm:code, l.global_cfm:name, l.global_cfm:value, l.global_cfm:id">
+			 FIELDS	= "l.global_cfm:code, l.global_cfm:name, l.global_cfm:value, l.global_cfm:preload, l.global_cfm:id">
 	<MvIF EXPR = "{ g.MvQUERY_Error }">
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-0006', g.MvQUERY_Error ) }">
 	</MvIF>
@@ -188,6 +193,7 @@ JSON Functions
 			<MvASSIGN NAME = "l.output" INDEX = "{ l.pos }" MEMBER = "code"		VALUE = "{ l.field:code }">
 			<MvASSIGN NAME = "l.output" INDEX = "{ l.pos }" MEMBER = "name"		VALUE = "{ l.field:name }">
 			<MvASSIGN NAME = "l.output" INDEX = "{ l.pos }" MEMBER = "value"	VALUE = "{ l.field:value }">
+			<MvASSIGN NAME = "l.output" INDEX = "{ l.pos }" MEMBER = "preload"		VALUE = "{ l.field:preload }">
 		</MvFOREACH>
 	<MvELSE>
 		<MvASSIGN NAME = "l.total_custom_fields" VALUE = "{ miva_splitstring( l.custom_fields, ',', l.custom_field_codes, l.flags ) }">
@@ -209,6 +215,24 @@ JSON Functions
 	<MvFUNCTIONRETURN VALUE = 1>
 </MvFUNCTION>
 
+<MvFUNCTION NAME = "Load_Global_Fields_Runtime" STANDARDOUTPUTLEVEL = "">
+	<MvOPENVIEW NAME	= "Merchant"
+				VIEW	= "TGCFM_GlobalFields"
+				QUERY	= "{ 'SELECT * FROM ' $ g.Store_Table_Prefix $ 'TGCFM_GlobalFields WHERE preload = 1' }">
+	<MvIF EXPR = "{ g.MvOPENVIEW_Error }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_Library_Utilities ].Error( 'TGCFM-ERROR-0010', g.MvOPENVIEW_Error ) }">
+	</MvIF>
+
+	<MvWHILE EXPR = "{ NOT TGCFM_GlobalFields.d.EOF }">
+		<MvASSIGN NAME = "l.void" VALUE = "{ GlobalField_Read( l.field ) }">
+		<MvASSIGN NAME = "l.fields:customfield_values:customfields" MEMBER = "{ l.field:code }" VALUE = "{ l.field:value }">
+		<MvASSIGN NAME = "l.fields:customfield_names:customfields" MEMBER = "{ l.field:code }" VALUE = "{ l.field:name }">
+		<MvSKIP NAME = "Merchant" VIEW = "TGCFM_GlobalFields" ROWS = 1>
+	</MvWHILE>
+
+	<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_GlobalFields">
+	<MvFUNCTIONRETURN VALUE = "{ l.fields }">
+</MvFUNCTION>
 
 
 <MvFUNCTION NAME = "JSON_Global_CFS_Load_Query" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "text, html, compresswhitespace">
@@ -245,7 +269,8 @@ JSON Functions
 					"id": <MvEVAL EXPR = "{ int( TGCFM_GlobalFields.d.id ) }">,
 					"code" : "<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_Encode( TGCFM_GlobalFields.d.code ) }">",
 					"name" : "<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_Encode( TGCFM_GlobalFields.d.name ) }">",
-					"value" : "<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_Encode( TGCFM_GlobalFields.d.value ) }">"
+					"value" : "<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_Encode( TGCFM_GlobalFields.d.value ) }">",
+					"preload" : <MvEVAL EXPR = "{ int( TGCFM_GlobalFields.d.preload ) }">
 					<MvEVAL EXPR = "{ [ g.Module_JSON ].JSON_ArrayElement_End() }">
 					<MvSKIP NAME = "Merchant" VIEW = "TGCFM_GlobalFields" ROWS = 1>
 					</MvWHILE>
@@ -263,6 +288,7 @@ JSON Functions
 	<MvASSIGN NAME = "l.global_cfm" MEMBER = "code" VALUE = "{ g.Code }">
 	<MvASSIGN NAME = "l.global_cfm" MEMBER = "name" VALUE = "{ g.Name }">
 	<MvASSIGN NAME = "l.global_cfm" MEMBER = "value" VALUE = "{ g.Value }">
+	<MvASSIGN NAME = "l.global_cfm" MEMBER = "preload" VALUE = "{ g.Preload }">
 
 	<MvIF EXPR = "{ NOT Global_Insert( l.global_cfm ) }">
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_FieldError( g.Error_Code, g.Error_Message ) }">
@@ -276,6 +302,7 @@ JSON Functions
 	<MvASSIGN NAME = "l.global_cfm" MEMBER = "code" VALUE = "{ g.Code }">
 	<MvASSIGN NAME = "l.global_cfm" MEMBER = "name" VALUE = "{ g.Name }">
 	<MvASSIGN NAME = "l.global_cfm" MEMBER = "value" VALUE = "{ g.Value }">
+	<MvASSIGN NAME = "l.global_cfm" MEMBER = "preload" VALUE = "{ g.Preload }">
 
 	<MvIF EXPR = "{ NOT Global_Update( l.global_cfm ) }">
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_FieldError( g.Error_Code, g.Error_Message ) }">
@@ -288,5 +315,18 @@ JSON Functions
 	<MvIF EXPR = "{ NOT Global_Delete( g.ID ) }">
 		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_FieldError( 'code', g.Error_Message ) }">
 	</MvIF>
+	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_Success() }">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "JSON_Global_Preload" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "">
+	<MvIF EXPR = "{ NOT Load_Global_CFM_ID( g.CF_ID, l.global_cfm ) }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_FieldError( 'code', g.Error_Message ) }">	
+	</MvIF>
+	<MvASSIGN NAME = "l.global_cfm" MEMBER = "preload" VALUE = "{ g.Preload }">
+		
+	<MvIF EXPR = "{ NOT Global_Update( l.global_cfm ) }">
+		<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_FieldError( g.Error_Code, g.Error_Message ) }">
+	</MvIF>
+
 	<MvFUNCTIONRETURN VALUE = "{ [ g.Module_JSON ].JSON_Response_Success() }">
 </MvFUNCTION>

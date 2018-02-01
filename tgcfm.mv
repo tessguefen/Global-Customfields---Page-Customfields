@@ -5,7 +5,7 @@
 	<MvASSIGN NAME = "l.module:version"		VALUE = "1.000">
 	<MvASSIGN NAME = "l.module:api_ver"		VALUE = "9.00">
 	<MvASSIGN NAME = "l.module:description"	VALUE = "Customfields in all the things and places and stuff.">
-	<MvASSIGN NAME = "l.module:features"	VALUE = "data_store, vis_util, util, json, clientside, component">
+	<MvASSIGN NAME = "l.module:features"	VALUE = "data_store, vis_util, util, json, clientside, component, system">
 </MvFUNCTION>
 
 <MvFUNCTION NAME = "Module_Install_Store" PARAMETERS = "module var" STANDARDOUTPUTLEVEL = "">
@@ -31,7 +31,8 @@
 								id		' $ [ g.Module_Library_Native_DBAPI ].DB_Type_NUMBER( 0, 0 ) 	$ ',
 								code	' $ [ g.Module_Library_Native_DBAPI ].DB_Type_CHAR( 50 ) 		$ ',
 								name	' $ [ g.Module_Library_Native_DBAPI ].DB_Type_CHAR( 100 ) 		$ ',
-								value	' $ [ g.Module_Library_Native_DBAPI ].DB_Type_MEMO()			$ '
+								value	' $ [ g.Module_Library_Native_DBAPI ].DB_Type_MEMO()			$ ',
+								preload	' $ [ g.Module_Library_Native_DBAPI ].DB_Type_BOOL()			$ '
 							  ) ' }">
 		<MvIF EXPR = "{ g.MvQUERY_Error }">
 			<MvASSIGN NAME = "l.void" VALUE = "{ Module_Uninstall_Store( l.module ) }">
@@ -337,6 +338,7 @@
 	<MvIF EXPR = "{ g.Module_Function EQ 'TGCFS_Global_Insert' }"><MvFUNCTIONRETURN VALUE = "{ JSON_Global_Insert( l.module ) }"></MvIF>
 	<MvIF EXPR = "{ g.Module_Function EQ 'TGCFS_Global_Update' }"><MvFUNCTIONRETURN VALUE = "{ JSON_Global_Update( l.module ) }"></MvIF>
 	<MvIF EXPR = "{ g.Module_Function EQ 'TGCFS_Global_Delete' }"><MvFUNCTIONRETURN VALUE = "{ JSON_Global_Delete( l.module ) }"></MvIF>
+	<MvIF EXPR = "{ g.Module_Function EQ 'TGCFS_Global_Preload' }"><MvFUNCTIONRETURN VALUE = "{ JSON_Global_Preload( l.module ) }"></MvIF>
 
 	<MvIF EXPR = "{ g.Module_Function EQ 'JSON_Groups_Load_Query' }"><MvFUNCTIONRETURN VALUE = "{ JSON_Groups_Load_Query( l.module ) }"></MvIF>
 	<MvIF EXPR = "{ g.Module_Function EQ 'TGCFS_Group_Insert' }"><MvFUNCTIONRETURN VALUE = "{ JSON_Group_Insert( l.module )	}"></MvIF>
@@ -451,6 +453,20 @@
 
 <MvFUNCTION NAME = "ComponentModule_Render_Start" PARAMETERS = "module var, item, settings var, item_settings var, param" STANDARDOUTPUTLEVEL = "html, text">
 </MvFUNCTION>
+
+<MvFUNCTION NAME = "SystemModule_Screen" PARAMETERS = "module var, screen" STANDARDOUTPUTLEVEL = "">
+	<MvASSIGN NAME = "g.Global_Custom_Fields" VALUE = "{ Load_Global_Fields_Runtime() }">
+	<MvFUNCTIONRETURN VALUE = "1">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "SystemModule_Action" PARAMETERS = "module var, action" STANDARDOUTPUTLEVEL = "">
+	<MvFUNCTIONRETURN VALUE = "1">
+</MvFUNCTION>
+
+<MvFUNCTION NAME = "SystemModule_UIException" PARAMETERS = "module var, exception" STANDARDOUTPUTLEVEL = "">
+	<MvFUNCTIONRETURN VALUE = "1">
+</MvFUNCTION>
+
 
 <MvINCLUDE FILE = "global_functions.mv">
 <MvINCLUDE FILE = "group_functions.mv">

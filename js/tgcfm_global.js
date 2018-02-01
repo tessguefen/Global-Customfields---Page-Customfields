@@ -38,6 +38,15 @@ function TGCFM_GlobalBatchlist_Update( id, fieldlist, callback, delegator ) {
 									   fieldlist,
 									   delegator );
 }
+function TGCFM_GlobalBatchlist_Preload( id, checked, callback, delegator ) {
+	return AJAX_Call_Module(	callback,
+								'admin',
+								'TGCFM',
+								'TGCFS_Global_Preload',
+								'CF_ID='	+ encodeURIComponent( id ) +
+								'&Preload='	+ ( checked ? 1 : 0 ),
+								delegator );
+}
 
 
 function TGCFM_GlobalBatchlist() {
@@ -68,7 +77,10 @@ TGCFM_GlobalBatchlist.prototype.onCreateRootColumnList = function() {
 			.SetAdvancedSearchEnabled(false),
 		new MMBatchList_Column_Code( 'Code', 'code', 'code'),
 		new MMBatchList_Column_Name( 'Name', 'name', 'name'),
-		new MMBatchList_Column_Name( 'Value', 'value', 'value')
+		new MMBatchList_Column_Name( 'Value', 'value', 'value'),
+		new MMBatchList_Column_CheckboxSlider('Preload', 'preload', 'preload', function( item, checked, delegator ) {
+			TGCFM_GlobalBatchlist.Update_Preload( item, checked, delegator );
+		} )
 	];
 
 	return columnlist;
@@ -95,4 +107,8 @@ TGCFM_GlobalBatchlist.prototype.onInsert = function( item, callback, delegator )
 
 TGCFM_GlobalBatchlist.prototype.onDelete = function( item, callback, delegator ) {
 	TGCFM_GlobalBatchlist_Delete( item.record.id, callback, delegator );
+}
+
+TGCFM_GlobalBatchlist.Update_Preload = function( item, checked, delegator ) {
+	TGCFM_GlobalBatchlist_Preload( item.record.id, checked, function( response ) {}, delegator );
 }
