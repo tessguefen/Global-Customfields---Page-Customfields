@@ -17,8 +17,8 @@ Items
 
 Global Customfields (on Load, Fields that are set to "Preload" will populate)
 ```
-g.Global_Custom_Fields:customfield_values:customfields:[code]
-g.Global_Custom_Fields:customfield_names:customfields:[code]
+g.Store:customfield_values:customfields:[code]
+g.Store:customfield_names:customfields:[code]
 ```
 
 Page Customfields (on Load, with `tgcfm` item assigned)

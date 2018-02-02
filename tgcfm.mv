@@ -522,7 +522,7 @@
 </MvFUNCTION>
 
 <MvFUNCTION NAME = "SystemModule_Screen" PARAMETERS = "module var, screen" STANDARDOUTPUTLEVEL = "">
-	<MvASSIGN NAME = "g.Store" VALUE = "{ Load_Global_Fields_Runtime() }">
+	<MvASSIGN NAME = "l.void" VALUE = "{ Load_Global_Fields_Runtime( g.Store ) }">
 	<MvFUNCTIONRETURN VALUE = "1">
 </MvFUNCTION>
 

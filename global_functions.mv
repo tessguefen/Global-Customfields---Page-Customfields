@@ -12,7 +12,7 @@ Functions
 Future Item/ MvDO Functions
 	GlobalFieldList_Load_All( fields var )
 	Load_Global_Fields( custom_fields, output var)
-	Load_Global_Fields_Runtime()
+	Load_Global_Fields_Runtime( ouput var )
 
 JSON Functions
 	JSON_Global_CFS_Load_Query( module var )
@@ -218,7 +218,7 @@ Component Functions
 	<MvFUNCTIONRETURN VALUE = 1>
 </MvFUNCTION>
 
-<MvFUNCTION NAME = "Load_Global_Fields_Runtime" STANDARDOUTPUTLEVEL = "">
+<MvFUNCTION NAME = "Load_Global_Fields_Runtime" PARAMETERS = "output var " STANDARDOUTPUTLEVEL = "">
 	<MvOPENVIEW NAME	= "Merchant"
 				VIEW	= "TGCFM_GlobalFields"
 				QUERY	= "{ 'SELECT * FROM ' $ g.Store_Table_Prefix $ 'TGCFM_GlobalFields WHERE preload = 1' }">
@@ -228,13 +228,13 @@ Component Functions
 
 	<MvWHILE EXPR = "{ NOT TGCFM_GlobalFields.d.EOF }">
 		<MvASSIGN NAME = "l.void" VALUE = "{ GlobalField_Read( l.field ) }">
-		<MvASSIGN NAME = "l.fields:customfield_values:customfields" MEMBER = "{ l.field:code }" VALUE = "{ l.field:value }">
-		<MvASSIGN NAME = "l.fields:customfield_names:customfields" MEMBER = "{ l.field:code }" VALUE = "{ l.field:name }">
+		<MvASSIGN NAME = "l.output:customfield_values:customfields" MEMBER = "{ l.field:code }" VALUE = "{ l.field:value }">
+		<MvASSIGN NAME = "l.output:customfield_names:customfields" MEMBER = "{ l.field:code }" VALUE = "{ l.field:name }">
 		<MvSKIP NAME = "Merchant" VIEW = "TGCFM_GlobalFields" ROWS = 1>
 	</MvWHILE>
 
 	<MvCLOSEVIEW NAME = "Merchant" VIEW = "TGCFM_GlobalFields">
-	<MvFUNCTIONRETURN VALUE = "{ l.fields }">
+	<MvFUNCTIONRETURN VALUE = 1>
 </MvFUNCTION>
 
 
